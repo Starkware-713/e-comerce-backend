@@ -1,131 +1,170 @@
-# FastAPI PostgreSQL API
+# 🛒 E-commerce API
 
-Este proyecto es una API basada en FastAPI que se conecta a una base de datos PostgreSQL. Incluye autenticación y registro de usuarios con métodos de seguridad.
+API construida con **FastAPI** y conectada a una base de datos **PostgreSQL**, que incluye autenticación segura, gestión de usuarios, carritos de compra y productos.
 
-## Estructura del Proyecto
-```
+---
+
+## 📁 Estructura del Proyecto
+
+```bash
 .
 ├── app/
-│   ├── models/ # Modelos SQLAlchemy
-|   |   ├── cart.py 
-|   |   ├── product.py 
-|   |   ├── user.py
-│   ├── routers/  # Rutas de la API
-|   |   ├── carts.py
-|   |   ├── products.py 
-|   |   ├── users.py
-│   ├── schemas/        # Esquemas Pydantic
-|   |   ├── cart.py 
-|   |   ├── product.py
-|   |   ├── user.py
-│   ├── database.py     # Configuración de la base de datos
-│   └── utils.py        # Utilidades
+│   ├── models/        # Modelos SQLAlchemy
+│   │   ├── cart.py 
+│   │   ├── product.py 
+│   │   └── user.py
+│   ├── routers/       # Rutas de la API
+│   │   ├── carts.py
+│   │   ├── products.py 
+│   │   └── users.py
+│   ├── schemas/       # Esquemas Pydantic
+│   │   ├── cart.py 
+│   │   ├── product.py
+│   │   └── user.py
+│   ├── database.py    # Configuración de la base de datos
+│   └── utils.py       # Funciones utilitarias
 ├── .env               # Variables de entorno
-├── main.py            # Punto de entrada de la aplicación
-└── requirements.txt   # Dependencias del proyecto
+├── main.py            # Punto de entrada
+└── requirements.txt   # Dependencias
 ```
 
-## Características
-- Registro de usuarios
-- Autenticación de usuarios
-- Manejo seguro de contraseñas
-- Integración con PostgreSQL
-- Validación de datos con Pydantic
-- Estructura modular y escalable
+---
 
-## Requisitos Previos
+## 🚀 Características
 
-1. **Python**
-   - Instalar Python 3.9 o superior desde [python.org](https://www.python.org/downloads/)
-   - Asegurarse de marcar la opción "Add Python to PATH" durante la instalación
+* 🧾 Registro y autenticación de usuarios
+* 🔐 Seguridad con hashing de contraseñas
+* 🛍️ Gestión de carritos de compra y productos
+* 🧩 Estructura modular y escalable
+* 🗄️ Conexión con PostgreSQL
+* ✅ Validación robusta con Pydantic
 
-2. **PostgreSQL**
-   - Descargar e instalar PostgreSQL desde [postgresql.org](https://www.postgresql.org/download/)
-   - Anotar la contraseña del usuario 'postgres' durante la instalación
-   - Crear una base de datos para el proyecto
+---
 
-## Configuración del Entorno
+## ⚙️ Requisitos Previos
 
-1. **Clonar el Repositorio**
-   ```bash
-   git clone https://github.com/Starkware-713/e-comerce-backend
-   cd e-comerce-backend
-   ```
+### 1. Python 3.9+
 
-2. **Crear y Activar el Entorno Virtual**
-   ```bash
-   # Crear el entorno virtual
-   python -m venv .venv
+* Descargar desde [python.org](https://www.python.org/downloads/)
+* Asegúrate de activar la opción **"Add Python to PATH"** durante la instalación
 
-   # Activar el entorno virtual
-   # En Windows (PowerShell):
-   .venv\Scripts\Activate.ps1
-   # En Windows (CMD):
-   .venv\Scripts\activate.bat
-   ```
+### 2. PostgreSQL
 
-3. **Instalar Dependencias**
-   ```bash
-   pip install -r requirements.txt
-   ```
+* Instalar desde [postgresql.org](https://www.postgresql.org/download/)
+* Guardar la contraseña del usuario `postgres`
+* Crear una base de datos para el proyecto
 
-4. **Configurar Variables de Entorno**
-   - Crear un archivo `.env` en la raíz del proyecto
-   - Agregar la siguiente configuración:
-     ```env
-     DATABASE_URL=postgresql://usuario:contraseña@localhost/nombre_db
-     ```
-   - Reemplazar 'usuario', 'contraseña' y 'nombre_db' con tus credenciales de PostgreSQL
+---
 
-## Iniciar la Aplicación
+## 🛠️ Configuración del Entorno
 
-1. **Verificar la Conexión a la Base de Datos**
-   - Asegurarse de que PostgreSQL esté corriendo
-   - Verificar que las credenciales en `.env` sean correctas
+### 1. Clonar el Repositorio
 
-2. **Ejecutar el Servidor**
-   ```bash
-   uvicorn main:app --reload
-   ```
+```bash
+git clone https://github.com/Starkware-713/e-comerce-backend
+cd e-comerce-backend
+```
 
-3. **Verificar la Instalación**
-   - Abrir en el navegador: http://localhost:8000/docs
-   - Deberías ver la documentación Swagger UI de la API
+### 2. Crear y Activar el Entorno Virtual
 
-## Solución de Problemas Comunes
+```bash
+# Crear entorno virtual
+python -m venv .venv
 
-1. **Error de Conexión a la Base de Datos**
-   - Verificar que PostgreSQL esté corriendo
-   - Comprobar las credenciales en el archivo `.env`
-   - Asegurarse de que la base de datos existe
+# Activar en PowerShell
+.venv\Scripts\Activate.ps1
 
-2. **Error al Activar el Entorno Virtual**
-   - Ejecutar PowerShell como administrador
-   - Ejecutar: `Set-ExecutionPolicy RemoteSigned`
-   - Intentar activar el entorno virtual nuevamente
+# Activar en CMD
+.venv\Scripts\activate.bat
+```
 
-3. **Error al Instalar Dependencias**
-   - Actualizar pip: `python -m pip install --upgrade pip`
-   - Intentar instalar las dependencias nuevamente
+### 3. Instalar Dependencias
 
-## Endpoints
+```bash
+pip install -r requirements.txt
+```
 
-### Carritos de compra 
-- `POST /carts/`: Crear Carrito de compra
-- `GET /carts/`: Obtener el carrito de compra
-- `GET /carts/{cart_id}`: obtener el carrito de compra por el ID 
+### 4. Crear archivo `.env`
 
-### Usuarios
-- `POST /users/`: Crear nuevo usuario
-- `GET /users/`: Listar usuarios
-- `GET /users/{user_id}`: Obtener usuario por ID
+```env
+DATABASE_URL=postgresql://usuario:contraseña@localhost/nombre_db
+```
 
-### Productos (Paquetes o simplemente las cosas por separado)
-- `POST /products/`: Creacion de productos
-- `GET /products/`: Obtener los productos
-- `GET /Products/{product_id}`: Obtener el producto por el ID 
+> Reemplaza `usuario`, `contraseña` y `nombre_db` con tus datos reales.
 
-## Documentación API 
-Una vez que el servidor esté corriendo, puedes acceder a:
-- Documentación Swagger UI: http://localhost:8000/docs
-- Documentación ReDoc: http://localhost:8000/redoc
+---
+
+## ▶️ Ejecutar la Aplicación
+
+1. Asegúrate de que PostgreSQL esté activo
+2. Verifica las credenciales en `.env`
+3. Ejecuta el servidor con:
+
+```bash
+uvicorn main:app --reload
+```
+
+4. Abre en tu navegador: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+## 🔄 Endpoints Principales
+
+### 🛍️ Carritos de Compra
+
+| Método | Endpoint           | Descripción                |
+| ------ | ------------------ | -------------------------- |
+| POST   | `/carts/`          | Crear carrito              |
+| GET    | `/carts/`          | Obtener todos los carritos |
+| GET    | `/carts/{cart_id}` | Obtener carrito por ID     |
+
+### 👤 Usuarios
+
+| Método | Endpoint           | Descripción               |
+| ------ | ------------------ | ------------------------- |
+| POST   | `/users/`          | Crear nuevo usuario       |
+| GET    | `/users/`          | Listar todos los usuarios |
+| GET    | `/users/{user_id}` | Obtener usuario por ID    |
+
+### 📦 Productos
+
+| Método | Endpoint         | Descripción             |
+| ------ | ---------------- | ----------------------- |
+| POST   | `/products/`     | Crear nuevo producto    |
+| GET    | `/products/`     | Listar productos        |
+| GET    | `/products/{id}` | Obtener producto por ID |
+
+---
+
+## 📚 Documentación de la API
+
+* [Swagger UI](http://localhost:8000/docs)
+* [ReDoc](http://localhost:8000/redoc)
+
+---
+
+## 🧰 Solución de Problemas
+
+### ❌ Error de Conexión a la Base de Datos
+
+* Asegúrate de que PostgreSQL está activo
+* Verifica las credenciales del archivo `.env`
+* Confirma que la base de datos fue creada
+
+### ⚠️ Error al Activar el Entorno Virtual
+
+```bash
+Set-ExecutionPolicy RemoteSigned
+```
+
+> Ejecutar como administrador en PowerShell
+
+### 🐍 Problemas con Dependencias
+
+```bash
+python -m pip install --upgrade pip
+```
+
+> Luego reinstala: `pip install -r requirements.txt`
+
+---
