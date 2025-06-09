@@ -6,9 +6,18 @@ Este proyecto es una API basada en FastAPI que se conecta a una base de datos Po
 ```
 .
 ├── app/
-│   ├── models/         # Modelos SQLAlchemy
-│   ├── routers/        # Rutas de la API
+│   ├── models/ # Modelos SQLAlchemy
+|   |   ├── cart.py 
+|   |   ├── product.py 
+|   |   ├── user.py
+│   ├── routers/  # Rutas de la API
+|   |   ├── carts.py
+|   |   ├── products.py 
+|   |   ├── users.py
 │   ├── schemas/        # Esquemas Pydantic
+|   |   ├── cart.py 
+|   |   ├── product.py
+|   |   ├── user.py
 │   ├── database.py     # Configuración de la base de datos
 │   └── utils.py        # Utilidades
 ├── .env               # Variables de entorno
@@ -101,12 +110,22 @@ Este proyecto es una API basada en FastAPI que se conecta a una base de datos Po
 
 ## Endpoints
 
+### Carritos de compra 
+- `POST /carts/`: Crear Carrito de compra
+- `GET /carts/`: Obtener el carrito de compra
+- `GET /carts/{cart_id}`: obtener el carrito de compra por el ID 
+
 ### Usuarios
 - `POST /users/`: Crear nuevo usuario
 - `GET /users/`: Listar usuarios
 - `GET /users/{user_id}`: Obtener usuario por ID
 
-## Documentación API
+### Productos (Paquetes o simplemente las cosas por separado)
+- `POST /products/`: Creacion de productos
+- `GET /products/`: Obtener los productos
+- `GET /Products/{product_id}`: Obtener el producto por el ID 
+
+## Documentación API 
 Una vez que el servidor esté corriendo, puedes acceder a:
 - Documentación Swagger UI: http://localhost:8000/docs
 - Documentación ReDoc: http://localhost:8000/redoc

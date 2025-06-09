@@ -27,8 +27,8 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
         return db_user
     except Exception as e:
-        print(f"Error creating user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        print(f"Error creando el usuario: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/", response_model=list[schemas.User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -36,16 +36,16 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
         users = db.query(models.User).offset(skip).limit(limit).all()
         return users
     except Exception as e:
-        print(f"Error reading users: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        print(f"Error leyendo usuarios: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     try:
         db_user = db.query(models.User).filter(models.User.id == user_id).first()
         if db_user is None:
-            return JSONResponse(status_code=404, content={"detail": "User not found"})
+            return JSONResponse(status_code=404, content={"detail": "Usuario no encontrado"})
         return db_user
     except Exception as e:
-        print(f"Error reading user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        print(f"Error leyendo el usuario: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
