@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import user as models
-from app.schemas import user as schemas
+from app.models import product as models
+from app.schemas import product as schemas
+from app.utils import get_current_user, check_rol
+from app.models.user import User
 
 router = APIRouter(
     prefix="/products",
@@ -11,7 +13,11 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=schemas.Product)
-def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
+def create_product(
+    product: schemas.ProductCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_rol(["vendedor"]))
+):
     try:
         db_product = models.Product(**product.dict())
         db.add(db_product)

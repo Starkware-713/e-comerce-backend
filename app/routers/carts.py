@@ -4,13 +4,19 @@ from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models import cart as models
 from app.schemas import cart as schemas
+from app.utils import get_current_user
+from app.models.user import User
 
 router = APIRouter(
     prefix="/carts",
     tags=["carts"]
 )
 @router.post("/", response_model=schemas.Cart)
-def create_cart(cart: schemas.CartCreate, db: Session = Depends(get_db)):
+def create_cart(
+    cart: schemas.CartCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         # Crear el carrito
         db_cart = models.Cart(user_id=cart.user_id)
@@ -34,7 +40,12 @@ def create_cart(cart: schemas.CartCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     
 @router.get("/", response_model=list[schemas.Cart])
-def read_carts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_carts(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         carts = (
             db.query(models.Cart)
@@ -52,7 +63,11 @@ def read_carts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/{cart_id}", response_model=schemas.Cart)
-def read_cart(cart_id: int, db: Session = Depends(get_db)):
+def read_cart(
+    cart_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         cart = (
             db.query(models.Cart)
