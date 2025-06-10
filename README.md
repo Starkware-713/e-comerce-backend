@@ -10,19 +10,25 @@ API construida con **FastAPI** y conectada a una base de datos **PostgreSQL**, q
 .
 ├── app/
 │   ├── models/        # Modelos SQLAlchemy
-│   │   ├── cart.py 
+│   │   ├── cart.py
 │   │   ├── product.py 
 │   │   └── user.py
 │   ├── routers/       # Rutas de la API
 │   │   ├── carts.py
 │   │   ├── products.py 
+│   │   ├── auth.py 
 │   │   └── users.py
 │   ├── schemas/       # Esquemas Pydantic
+│   │   ├── auth.py 
 │   │   ├── cart.py 
 │   │   ├── product.py
 │   │   └── user.py
 │   ├── database.py    # Configuración de la base de datos
-│   └── utils.py       # Funciones utilitarias
+│   └── utils/      # Funciones utilitarias
+│   │   ├── __init__.py
+│   │   ├── auth.py
+|   
+|  
 ├── .env               # Variables de entorno
 ├── main.py            # Punto de entrada
 └── requirements.txt   # Dependencias
@@ -108,38 +114,58 @@ uvicorn main:app --reload
 
 ---
 
-## 🔄 Endpoints Principales
+## 🔄 Endpoints de la API
 
-### 🛍️ Carritos de Compra
+### 🔐 Autenticación
 
-| Método | Endpoint           | Descripción                |
-| ------ | ------------------ | -------------------------- |
-| POST   | `/carts/`          | Crear carrito              |
-| GET    | `/carts/`          | Obtener todos los carritos |
-| GET    | `/carts/{cart_id}` | Obtener carrito por ID     |
+| Método | Endpoint          | Descripción                                      | Acceso     |
+| ------ | ---------------- | ------------------------------------------------ | ---------- |
+| POST   | `/auth/register` | Registrar nuevo usuario (comprador/vendedor)      | Público    |
+| POST   | `/auth/login`    | Iniciar sesión y obtener tokens                  | Público    |
+| POST   | `/auth/refresh`  | Renovar token de acceso usando refresh token     | Público    |
 
 ### 👤 Usuarios
 
-| Método | Endpoint           | Descripción               |
-| ------ | ------------------ | ------------------------- |
-| POST   | `/users/`          | Crear nuevo usuario       |
-| GET    | `/users/`          | Listar todos los usuarios |
-| GET    | `/users/{user_id}` | Obtener usuario por ID    |
+| Método | Endpoint           | Descripción                 | Acceso      |
+| ------ | ----------------- | --------------------------- | ----------- |
+| POST   | `/users/`         | Crear nuevo usuario         | Público     |
+| GET    | `/users/`         | Listar todos los usuarios   | Admin       |
+| GET    | `/users/{id}`     | Obtener usuario por ID      | Autenticado |
 
 ### 📦 Productos
 
-| Método | Endpoint         | Descripción             |
-| ------ | ---------------- | ----------------------- |
-| POST   | `/products/`     | Crear nuevo producto    |
-| GET    | `/products/`     | Listar productos        |
-| GET    | `/products/{id}` | Obtener producto por ID |
+| Método | Endpoint          | Descripción                | Acceso      |
+| ------ | ---------------- | -------------------------- | ----------- |
+| POST   | `/products/`     | Crear nuevo producto       | Vendedor    |
+| GET    | `/products/`     | Listar todos los productos | Público     |
+| GET    | `/products/{id}` | Obtener producto por ID    | Público     |
+
+### 🛍️ Carritos de Compra
+
+| Método | Endpoint           | Descripción                 | Acceso      |
+| ------ | ----------------- | --------------------------- | ----------- |
+| POST   | `/carts/`         | Crear nuevo carrito         | Autenticado |
+| GET    | `/carts/`         | Listar carritos del usuario | Autenticado |
+| GET    | `/carts/{id}`     | Obtener carrito por ID      | Autenticado |
 
 ---
 
-## 📚 Documentación de la API
+## 📚 Documentación Detallada
 
-* [Swagger UI](http://localhost:8000/docs)
-* [ReDoc](http://localhost:8000/redoc)
+### 🔑 Autenticación y Autorización
+
+La API utiliza autenticación basada en JWT (JSON Web Tokens) con:
+* Access Token: Para acceso a recursos protegidos (duración: 30 minutos)
+* Refresh Token: Para renovar el access token (duración: 7 días)
+
+#### Roles de Usuario
+* 👑 **Admin**: Acceso total al sistema
+* 🏪 **Vendedor**: Gestión de productos
+* 🛒 **Comprador**: Gestión de carritos de compra
+
+### 📖 Documentación Interactiva
+* [Swagger UI](http://localhost:8000/docs): Interfaz interactiva para probar endpoints
+* [ReDoc](http://localhost:8000/redoc): Documentación detallada y esquemas
 
 ---
 
