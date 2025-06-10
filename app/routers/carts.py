@@ -11,6 +11,7 @@ router = APIRouter(
     prefix="/carts",
     tags=["carts"]
 )
+# Crear un carrito de compras 
 @router.post("/", response_model=schemas.Cart)
 def create_cart(
     cart: schemas.CartCreate,
@@ -18,12 +19,9 @@ def create_cart(
     current_user: User = Depends(get_current_user)
 ):
     try:
-        # Crear el carrito
         db_cart = models.Cart(user_id=cart.user_id)
         db.add(db_cart)
-        db.flush()  # Para obtener el ID del carrito
-        
-        # Crear los items del carrito
+        db.flush()  
         for item in cart.items:
             cart_item = models.CartItem(
                 cart_id=db_cart.id,
@@ -61,7 +59,8 @@ def read_carts(
     except Exception as e:
         print(f"Error leyendo los carritos: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
-
+    
+#listar el carrito de un usuario segun el ID
 @router.get("/{cart_id}", response_model=schemas.Cart)
 def read_cart(
     cart_id: int,
@@ -83,4 +82,23 @@ def read_cart(
         return cart
     except Exception as e:
         print(f"Error leyendo el carrito {cart_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    
+#Eliminacion del carrito segun el id y el usuario autenticado
+@router.delete("/{cart_id}", response_model=schemas.Cart)
+def delete_cart(
+    cart_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id).first()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado")
+        
+        db.delete(cart)
+        db.commit()
+        return JSONResponse(status_code=204, content=None)
+    except Exception as e:
+        print(f"Error eliminando el carrito {cart_id}: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
