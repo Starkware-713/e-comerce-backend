@@ -28,6 +28,7 @@ def create_product(
         print(f"Error creando el producto: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
+
 # Listar todos los productos
 @router.get("/", response_model=list[schemas.Product])
 def read_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -37,6 +38,8 @@ def read_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     except Exception as e:
         print(f"Error leyendo los productos: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+        
 @router.get("/{product_id}", response_model=schemas.Product)
 def read_product(product_id: int, db: Session = Depends(get_db)):
     try:
@@ -47,6 +50,7 @@ def read_product(product_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error leyendo el producto: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
+
 
 #actualizar un producto segun su ID
 @router.put("/{product_id}", response_model=schemas.Product)
