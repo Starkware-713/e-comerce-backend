@@ -85,7 +85,7 @@ def read_cart(
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 #Agregar un producto al carrito segun el ID del carrito y el ID del producto
-@router.put("/{cart_id}/product", response_model=schemas.Cart)
+@router.put("/{cart_id}/add", response_model=schemas.Cart)
 def add_product_to_cart(
     cart_id: int,
     product: schemas.CartItemCreate,
