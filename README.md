@@ -10,28 +10,26 @@ API construida con **FastAPI** y conectada a una base de datos **PostgreSQL**, q
 .
 ├── app/
 │   ├── models/        # Modelos SQLAlchemy
+│   │   ├── __init__.py
 │   │   ├── cart.py
 │   │   ├── product.py 
 │   │   └── user.py
 │   ├── routers/       # Rutas de la API
+│   │   ├── auth.py
 │   │   ├── carts.py
 │   │   ├── products.py 
-│   │   ├── auth.py 
 │   │   └── users.py
 │   ├── schemas/       # Esquemas Pydantic
 │   │   ├── auth.py 
 │   │   ├── cart.py 
 │   │   ├── product.py
 │   │   └── user.py
-│   ├── database.py    # Configuración de la base de datos
-│   └── utils/      # Funciones utilitarias
+│   ├── utils/         # Funciones utilitarias
 │   │   ├── __init__.py
-│   │   ├── auth.py
-|   
-|  
-├── .env               # Variables de entorno
-├── main.py            # Punto de entrada
-└── requirements.txt   # Dependencias
+│   │   └── auth.py
+│   └── database.py    # Configuración de la base de datos
+├── main.py           # Punto de entrada
+└── requirements.txt  # Dependencias
 ```
 
 ---
@@ -94,6 +92,7 @@ pip install -r requirements.txt
 
 ```env
 DATABASE_URL=postgresql://usuario:contraseña@localhost/nombre_db
+PORT=8000  # Puerto opcional, por defecto 8000
 ```
 
 > Reemplaza `usuario`, `contraseña` y `nombre_db` con tus datos reales.
@@ -107,6 +106,8 @@ DATABASE_URL=postgresql://usuario:contraseña@localhost/nombre_db
 3. Ejecuta el servidor con:
 
 ```bash
+python main.py
+# O alternativamente:
 uvicorn main:app --reload
 ```
 
@@ -131,22 +132,29 @@ uvicorn main:app --reload
 | POST   | `/users/`         | Crear nuevo usuario         | Público     |
 | GET    | `/users/`         | Listar todos los usuarios   | Admin       |
 | GET    | `/users/{id}`     | Obtener usuario por ID      | Autenticado |
+| PUT    | `/users/{id}`     | Actualizar usuario          | Autenticado |
+| DELETE | `/users/{id}`     | Eliminar usuario            | Admin       |
 
 ### 📦 Productos
 
-| Método | Endpoint          | Descripción                | Acceso      |
-| ------ | ---------------- | -------------------------- | ----------- |
-| POST   | `/products/`     | Crear nuevo producto       | Vendedor    |
-| GET    | `/products/`     | Listar todos los productos | Público     |
-| GET    | `/products/{id}` | Obtener producto por ID    | Público     |
+| Método | Endpoint           | Descripción                | Acceso      |
+| ------ | ----------------- | -------------------------- | ----------- |
+| POST   | `/products/`      | Crear nuevo producto       | Vendedor    |
+| GET    | `/products/`      | Listar todos los productos | Público     |
+| GET    | `/products/{id}`  | Obtener producto por ID    | Público     |
+| PUT    | `/products/{id}`  | Actualizar producto        | Vendedor    |
+| DELETE | `/products/{id}`  | Eliminar producto          | Vendedor    |
 
 ### 🛍️ Carritos de Compra
 
-| Método | Endpoint           | Descripción                 | Acceso      |
-| ------ | ----------------- | --------------------------- | ----------- |
-| POST   | `/carts/`         | Crear nuevo carrito         | Autenticado |
-| GET    | `/carts/`         | Listar carritos del usuario | Autenticado |
-| GET    | `/carts/{id}`     | Obtener carrito por ID      | Autenticado |
+| Método | Endpoint                    | Descripción                      | Acceso      |
+| ------ | -------------------------- | -------------------------------- | ----------- |
+| POST   | `/carts/`                  | Crear nuevo carrito              | Autenticado |
+| GET    | `/carts/`                  | Listar carritos del usuario      | Autenticado |
+| GET    | `/carts/{id}`              | Obtener carrito por ID          | Autenticado |
+| POST   | `/carts/{id}/items`        | Agregar producto al carrito     | Autenticado |
+| DELETE | `/carts/{id}/items/{item}` | Eliminar producto del carrito   | Autenticado |
+| PUT    | `/carts/{id}/checkout`     | Procesar compra del carrito     | Autenticado |
 
 ---
 

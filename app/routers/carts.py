@@ -83,7 +83,101 @@ def read_cart(
     except Exception as e:
         print(f"Error leyendo el carrito {cart_id}: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
-    
+
+#Agregar un producto al carrito segun el ID del carrito y el ID del producto
+@router.put("/{cart_id}/product", response_model=schemas.Cart)
+def add_product_to_cart(
+    cart_id: int,
+    product: schemas.CartItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no pertenece al usuario")
+
+        existing_item = db.query(models.CartItem).filter(
+            models.CartItem.cart_id == cart_id,
+            models.CartItem.product_id == product.product.id
+        ).first()
+
+        if existing_item:
+            existing_item.quantity += product.quantity
+        else:
+            new_item = models.CartItem(
+                cart_id=cart_id,
+                product_id=product.product.id,
+                quantity=product.quantity
+            )
+            db.add(new_item)
+
+        db.commit()
+        db.refresh(cart)
+        return cart
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
+
+#actualizar la cantidad de un producto en el carrito
+@router.put("/{cart_id}/product/{product_id}", response_model=schemas.Cart)
+def update_product_quantity_in_cart(
+    cart_id: int,
+    product_id: int,
+    quantity: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no pertenece al usuario")
+        
+        cart_item = db.query(models.CartItem).filter(
+            models.CartItem.cart_id == cart_id,
+            models.CartItem.product_id == product_id
+        ).first()
+
+        if not cart_item:
+            raise HTTPException(status_code=404, detail="El producto no está en el carrito")
+
+        if quantity <= 0:
+            db.delete(cart_item)
+        else:
+            cart_item.quantity = quantity
+
+        db.commit()
+        return cart
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
+
+#eliminacion de un producto en un carrito basado en el ID del carrito y el ID del producto
+@router.delete("/{cart_id}/product/{product_id}", status_code=204)
+def delete_product_from_cart(
+    cart_id: int,
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no pertenece al usuario")
+        cart_item = db.query(models.CartItem).filter(
+            models.CartItem.cart_id == cart_id,
+            models.CartItem.product_id == product_id
+        ).first()
+
+        if not cart_item:
+            raise HTTPException(status_code=404, detail="El producto no está en el carrito")
+
+        db.delete(cart_item)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
+
 #Eliminacion del carrito segun el id y el usuario autenticado
 @router.delete("/{cart_id}", response_model=schemas.Cart)
 def delete_cart(
