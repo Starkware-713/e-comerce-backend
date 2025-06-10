@@ -27,10 +27,10 @@ app.add_middleware(
 )
 
 # Incluir rutas
-app.include_router(auth.router)  # Auth router debe ser el primero
-app.include_router(users.router)
-app.include_router(carts.router)
-app.include_router(products.router)
+app.include_router(auth.router)  #ruta de autenticación
+app.include_router(users.router) #ruta de usuarios 
+app.include_router(carts.router) #ruta de carritos
+app.include_router(products.router) #ruta de productos 
 
 @app.get("/")
 def read_root():

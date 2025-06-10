@@ -10,19 +10,25 @@ API construida con **FastAPI** y conectada a una base de datos **PostgreSQL**, q
 .
 ├── app/
 │   ├── models/        # Modelos SQLAlchemy
-│   │   ├── cart.py 
+│   │   ├── cart.py
 │   │   ├── product.py 
 │   │   └── user.py
 │   ├── routers/       # Rutas de la API
 │   │   ├── carts.py
 │   │   ├── products.py 
+│   │   ├── auth.py 
 │   │   └── users.py
 │   ├── schemas/       # Esquemas Pydantic
+│   │   ├── auth.py 
 │   │   ├── cart.py 
 │   │   ├── product.py
 │   │   └── user.py
 │   ├── database.py    # Configuración de la base de datos
-│   └── utils.py       # Funciones utilitarias
+│   └── utils/      # Funciones utilitarias
+│   │   ├── __init__.py
+│   │   ├── auth.py
+|   
+|  
 ├── .env               # Variables de entorno
 ├── main.py            # Punto de entrada
 └── requirements.txt   # Dependencias
