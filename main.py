@@ -27,17 +27,17 @@ app.add_middleware(
 )
 
 # Incluir rutas
-app.include_router(auth.router)  #ruta de autenticación
-app.include_router(users.router) #ruta de usuarios 
-app.include_router(carts.router) #ruta de carritos
-app.include_router(products.router) #ruta de productos 
+app.include_router(auth.router)  #rutas de autenticación
+app.include_router(users.router) #rutas de usuarios 
+app.include_router(carts.router) #rutas de carritos
+app.include_router(products.router) #rutas de productos 
 
 @app.get("/")
 def read_root():
     return {"message": "Bienvenido a la api"}
 
 # Obtener el puerto de la variable de entorno o usar el predeterminado
-port = int(os.getenv("PORT", 8000))
+port = int(os.getenv("PORT"))
 
 # Para despliegue
 if __name__ == "__main__":

@@ -178,6 +178,25 @@ def delete_product_from_cart(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
 
+#Checkout de carrito y actualizacion del estado del carrito. 
+#ACTUALIZAR LA FUNCION UNA VEZ TERMINADO TODO PARA PODER HACER EL ENVIO DE MAIL
+@router.put("/{cart_id}/checkout", response_model=schemas.Cart)
+def checkout_cart(
+    cart_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no pertenece al usuario")
+        cart.checked_out = True
+        db.commit()
+        return cart
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
+
 #Eliminacion del carrito segun el id y el usuario autenticado
 @router.delete("/{cart_id}", response_model=schemas.Cart)
 def delete_cart(
