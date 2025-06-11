@@ -11,7 +11,7 @@ class OrderHistory(Base):
     order_number = Column(String, unique=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     total_amount = Column(Integer, default=0)
-    status = Column(String)  # delivered, cancelled
+    status = Column(String)  
     created_at = Column(DateTime, default=datetime.utcnow)
     delivered_at = Column(DateTime, nullable=True)
     cancelled_at = Column(DateTime, nullable=True)
