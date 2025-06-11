@@ -21,7 +21,12 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             return JSONResponse(status_code=400, content={"detail": "Email already registered"})
 
         hashed_password = get_password_hash(user.password)
-        db_user = models.User(email=user.email, hashed_password=hashed_password)
+        db_user = models.User(
+            email=user.email,
+            name=user.name,
+            lastname=user.lastname,
+            hashed_password=hashed_password
+        )
 
         db.add(db_user)
         db.commit()
