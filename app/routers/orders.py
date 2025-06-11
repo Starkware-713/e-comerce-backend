@@ -178,3 +178,84 @@ async def update_order_status(
         print(f"Error actualizando el estado de la orden: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
+@router.get("/my-orders", response_model=list[schemas.Order])
+async def get_my_orders(
+    status: str = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Obtener los pedidos del cliente actual.
+    Opcionalmente se puede filtrar por estado: pending, created, paid, processing, shipped, delivered, cancelled
+    """
+    query = db.query(order_models).filter(order_models.user_id == current_user.id)
+    
+    if status:
+        query = query.filter(order_models.status == status)
+    
+    orders = query.order_by(order_models.created_at.desc()).offset(skip).limit(limit).all()
+    return orders
+
+#Actualizacion de un pedido pendiente
+@router.put("/{order_id}", response_model=schemas.Order)
+async def update_order(
+    order_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    order = db.query(order_models).filter(
+        order_models.id == order_id,
+        order_models.user_id == current_user.id
+    ).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        
+    if order.status != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail="Solo se pueden modificar pedidos pendientes"
+        )
+    
+    valid_statuses = ["pending", "cancelled"]
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Estado no válido. Estados permitidos: {', '.join(valid_statuses)}"
+        )
+    
+    order.status = status
+    db.commit()
+    db.refresh(order)
+    return order
+
+#"Cancelacion" de un pedido pendiente
+@router.delete("/{order_id}", response_model=schemas.Order)
+async def cancel_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    order = db.query(order_models).filter(
+        order_models.id == order_id,
+        order_models.user_id == current_user.id
+    ).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        
+    if order.status != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail="Solo se pueden cancelar pedidos pendientes"
+        )
+    
+    order.status = "cancelled"
+    db.commit()
+    db.refresh(order)
+    return order
+
