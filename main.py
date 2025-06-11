@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import engine, Base
-from app.routers import users, carts, products, auth, orders
+from app.routers import users, carts, products, auth, orders, sales, order_management
 
 # Carga de variables de entorno
 load_dotenv()
@@ -32,6 +32,8 @@ app.include_router(users.router) #rutas de usuarios
 app.include_router(carts.router) #rutas de carritos
 app.include_router(products.router) #rutas de productos 
 app.include_router(orders.router) #rutas de órdenes
+app.include_router(order_management.router) #rutas de gestión de órdenes
+app.include_router(sales.router) #rutas de ventas
 
 @app.get("/")
 def read_root():

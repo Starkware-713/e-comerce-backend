@@ -8,4 +8,4 @@ class Product(Base):
     description = Column(String, index=True)
     price = Column(Integer)  
     is_active = Column(Boolean, default=True)  
-    category_id = Column(Integer, index=True)  
+    category = Column(Integer, index=True) 
