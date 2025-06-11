@@ -39,6 +39,8 @@ async def create_order(
         
         if not cart.items:
             raise HTTPException(status_code=400, detail="El carrito está vacío")
+
+        # 2. Crear la orden
         order_number = generate_order_number()
         db_order = order_models.Order(
             order_number=order_number,
@@ -46,7 +48,9 @@ async def create_order(
             status="pending"
         )
         db.add(db_order)
-        db.flush() 
+        db.flush()  # Para obtener el ID de la orden
+
+        # 3. Crear los items de la orden
         total_amount = 0
         for cart_item in cart.items:
             order_item = order_models.OrderItem(
@@ -56,15 +60,19 @@ async def create_order(
                 unit_price=cart_item.product.price
             )
             total_amount += cart_item.quantity * cart_item.product.price
-            db.add(order_item)       
+            db.add(order_item)        # 4. Actualizar el total y el estado de la orden
         db_order.total_amount = total_amount
         db_order.status = "created"
+
+        # 5. Limpiar el carrito
         cart.status = "completed"
         for item in cart.items:
             db.delete(item)
 
         db.commit()
         db.refresh(db_order)
+
+        # 6. Enviar correo de confirmación
         order_items = (
             db.query(OrderItem)
             .filter(OrderItem.order_id == db_order.id)
@@ -86,7 +94,6 @@ async def create_order(
         print(f"Error creando la orden: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-# obtener todas las ordenes del usuario logueado
 @router.get("/", response_model=list[schemas.Order])
 async def get_orders(
     skip: int = 0,
@@ -94,6 +101,7 @@ async def get_orders(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """Obtiene todas las órdenes del usuario actual"""
     try:
         orders = (
             db.query(order_models.Order)

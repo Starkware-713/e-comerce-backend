@@ -4,8 +4,6 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import product as models
 from app.schemas import product as schemas
-from app.utils import get_current_user, check_rol
-from app.models.user import User
 
 router = APIRouter(
     prefix="/sales",

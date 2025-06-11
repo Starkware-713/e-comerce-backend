@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
-from app.models.orders import Order as OrderModel
+from app.models.orders import Order as OrderModel, OrderItem
 from app.models.order_history import OrderHistory, OrderHistoryItem
 from app.schemas import order as order_schemas
 from app.schemas import order_history as history_schemas
@@ -27,7 +27,7 @@ async def get_pending_orders(
             db.query(OrderModel)
             .filter(OrderModel.status.in_(["pending", "created", "paid", "processing", "shipped"]))
             .options(
-                joinedload(OrderModel.items).joinedload(OrderModel.product),
+                joinedload(OrderModel.items).joinedload(OrderItem.product),
                 joinedload(OrderModel.user)
             )
             .offset(skip)
@@ -47,19 +47,27 @@ async def mark_as_delivered(
 ):
     """Marcar pedido como entregado"""
     try:
-        order = db.query(OrderModel).filter(OrderModel.id == order_id).first()
-        
+        order = (
+            db.query(OrderModel)
+            .filter(OrderModel.id == order_id)
+            .options(
+                joinedload(OrderModel.items).joinedload(OrderItem.product),
+                joinedload(OrderModel.user)
+            )
+            .first()
+        )
+
         if not order:
             raise HTTPException(status_code=404, detail="Pedido no encontrado")
             
-        if order.status not in ["shipped", "processing"]:
+        if order.status not in ["processing", "shipped"]:
             raise HTTPException(
                 status_code=400,
-                detail="Solo se pueden marcar como entregados los pedidos en estado 'shipped' o 'processing'"
+                detail="Solo se pueden entregar pedidos en estado processing o shipped"
             )
         
-        # Crear registro en el historial
-        history_order = OrderHistory(
+        # Crear entrada en el historial
+        history_entry = OrderHistory(
             order_number=order.order_number,
             user_id=order.user_id,
             total_amount=order.total_amount,
@@ -67,25 +75,26 @@ async def mark_as_delivered(
             created_at=order.created_at,
             delivered_at=datetime.utcnow()
         )
-        db.add(history_order)
-        db.flush()
+        db.add(history_entry)
+        db.flush()  # Para obtener el ID
         
-        # Copiar items al historial
+        # Mover items al historial
         for item in order.items:
             history_item = OrderHistoryItem(
-                order_history_id=history_order.id,
+                order_history_id=history_entry.id,
                 product_id=item.product_id,
                 quantity=item.quantity,
                 unit_price=item.unit_price
             )
             db.add(history_item)
         
-        # Eliminar orden original
-        db.delete(order)
-        db.commit()
-        db.refresh(history_order)
+        # Marcar orden original como entregada y moverla al historial
+        order.status = "delivered"
         
-        return history_order
+        db.commit()
+        db.refresh(history_entry)
+        return history_entry
+        
     except Exception as e:
         db.rollback()
         print(f"Error marcando orden como entregada: {e}")
@@ -99,19 +108,27 @@ async def cancel_order(
 ):
     """Anular pedido"""
     try:
-        order = db.query(OrderModel).filter(OrderModel.id == order_id).first()
+        order = (
+            db.query(OrderModel)
+            .filter(OrderModel.id == order_id)
+            .options(
+                joinedload(OrderModel.items).joinedload(OrderItem.product),
+                joinedload(OrderModel.user)
+            )
+            .first()
+        )
         
         if not order:
             raise HTTPException(status_code=404, detail="Pedido no encontrado")
             
-        if order.status in ["delivered", "cancelled"]:
+        if order.status not in ["pending", "created", "paid"]:
             raise HTTPException(
                 status_code=400,
-                detail="No se puede cancelar un pedido que ya está entregado o cancelado"
+                detail="Solo se pueden anular pedidos en estado pending, created o paid"
             )
         
-        # Crear registro en el historial
-        history_order = OrderHistory(
+        # Crear entrada en el historial
+        history_entry = OrderHistory(
             order_number=order.order_number,
             user_id=order.user_id,
             total_amount=order.total_amount,
@@ -119,51 +136,60 @@ async def cancel_order(
             created_at=order.created_at,
             cancelled_at=datetime.utcnow()
         )
-        db.add(history_order)
-        db.flush()
+        db.add(history_entry)
+        db.flush()  # Para obtener el ID
         
-        # Copiar items al historial
+        # Mover items al historial
         for item in order.items:
             history_item = OrderHistoryItem(
-                order_history_id=history_order.id,
+                order_history_id=history_entry.id,
                 product_id=item.product_id,
                 quantity=item.quantity,
                 unit_price=item.unit_price
             )
             db.add(history_item)
         
-        # Eliminar orden original
-        db.delete(order)
-        db.commit()
-        db.refresh(history_order)
+        # Marcar orden original como anulada
+        order.status = "cancelled"
         
-        return history_order
+        db.commit()
+        db.refresh(history_entry)
+        return history_entry
+        
     except Exception as e:
         db.rollback()
-        print(f"Error cancelando la orden: {e}")
+        print(f"Error anulando orden: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/history", response_model=list[history_schemas.OrderHistory])
 async def get_order_history(
+    status: str = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(check_rol(["vendedor", "admin"]))
 ):
-    """Obtener historial de pedidos"""
+    """Ver historial de pedidos"""
     try:
-        history = (
-            db.query(OrderHistory)
-            .options(
-                joinedload(OrderHistory.items).joinedload(OrderHistoryItem.product),
-                joinedload(OrderHistory.user)
-            )
-            .order_by(OrderHistory.created_at.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        query = db.query(OrderHistory).options(
+            joinedload(OrderHistory.items).joinedload(OrderHistoryItem.product),
+            joinedload(OrderHistory.user)
         )
+        
+        if status:
+            if status not in ["delivered", "cancelled"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Estado no válido. Estados permitidos: delivered, cancelled"
+                )
+            query = query.filter(OrderHistory.status == status)
+        
+        history = query.order_by(
+            OrderHistory.created_at.desc()
+        ).offset(skip).limit(limit).all()
+        
         return history
+        
     except Exception as e:
         print(f"Error obteniendo historial de órdenes: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
