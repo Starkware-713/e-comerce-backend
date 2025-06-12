@@ -67,3 +67,41 @@ def send_order_confirmation(to_email: str, order_number: str, total_amount: floa
         print(f"Error enviando el correo: {str(e)}")
         return False
 
+def send_payment_confirmation(to_email: str, order_id: int, invoice_number: int) -> bool:
+    try:
+        message = MIMEMultipart()
+        message["From"] = email_address
+        message["To"] = to_email
+        message["Subject"] = f"Confirmación de Pago - Factura #{invoice_number}"
+
+        html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif;">
+                <h2>¡Pago Confirmado!</h2>
+                <p>El pago de tu orden #{order_id} ha sido procesado exitosamente.</p>
+                
+                <h3>Detalles de la factura:</h3>
+                <ul>
+                    <li>Número de Factura: {invoice_number}</li>
+                    <li>Número de Orden: {order_id}</li>
+                </ul>
+                
+                <p>Puedes descargar tu factura desde tu perfil en nuestra plataforma.</p>
+                
+                <p>¡Gracias por tu compra!</p>
+            </body>
+        </html>
+        """
+
+        message.attach(MIMEText(html, "html"))
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_address, smtp_port, context=context) as server:
+            server.login(email_address, email_password)
+            server.send_message(message)
+            
+        return True
+    except Exception as e:
+        print(f"Error enviando confirmación de pago: {str(e)}")
+        return False
+

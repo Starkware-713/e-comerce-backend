@@ -81,8 +81,8 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
         )
 
 @router.post("/login", response_model=schemas.Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
+async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = authenticate_user(db, login_data.email, login_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
