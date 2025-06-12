@@ -9,13 +9,15 @@ from app.routers import users, carts, products, auth, orders, sales, order_manag
 # Carga de variables de entorno
 load_dotenv()
 
-# Crear las tablas en la base de datos
-Base.metadata.create_all(bind=engine)
+# Crear la aplicación FastAPI
 app = FastAPI(
     title="API E-commerce con FastAPI y PostgreSQL",
     description="API para una webapp de e-commerce utilizando FastAPI y PostgreSQL",
     version="1.0.0"
 )
+
+# Crear las tablas en la base de datos
+create_tables()
 
 # Agregar middleware CORS
 app.add_middleware(
@@ -41,7 +43,7 @@ def read_root():
     return {"message": "Bienvenido a la api"}
 
 # Obtener el puerto de la variable de entorno o usar el predeterminado
-port = int(os.getenv("PORT"))
+port = 8000
 
 # Para despliegue
 if __name__ == "__main__":
