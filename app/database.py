@@ -9,8 +9,7 @@ import os
 load_dotenv()
 
 # URL por defecto si no se encuentra en las variables de entorno
-DEFAULT_DATABASE_URL = "postgresql://postgres:your_password@localhost:5432/ecommerce_db"
-DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL no está configurada en las variables de entorno")

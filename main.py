@@ -42,7 +42,7 @@ def read_root():
     return {"message": "Bienvenido a la api"}
 
 # Obtener el puerto de la variable de entorno o usar el predeterminado
-port = int(os.getenv("PORT"))
+port = 8000
 
 # Para despliegue
 if __name__ == "__main__":
