@@ -105,3 +105,39 @@ def send_payment_confirmation(to_email: str, order_id: int, invoice_number: int)
         print(f"Error enviando confirmación de pago: {str(e)}")
         return False
 
+def send_test_email(to_email: str) -> bool:
+    try:
+        message = MIMEMultipart()
+        message["From"] = email_address
+        message["To"] = to_email
+        message["Subject"] = "Prueba de Email - E-commerce Backend"
+
+        html = """
+        <html>
+            <body style="font-family: Arial, sans-serif;">
+                <h2>¡Prueba de Email Exitosa!</h2>
+                <p>Si estás viendo este mensaje, la configuración de email está funcionando correctamente.</p>
+                
+                <h3>Detalles de la prueba:</h3>
+                <ul>
+                    <li>Tipo: Email de prueba</li>
+                    <li>Estado: Enviado</li>
+                    <li>Servidor SMTP: Gmail</li>
+                </ul>
+                
+                <p>Este es un mensaje automático de prueba.</p>
+            </body>
+        </html>
+        """
+
+        message.attach(MIMEText(html, "html"))
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_address, smtp_port, context=context) as server:
+            server.login(email_address, email_password)
+            server.send_message(message)
+            
+        return True
+    except Exception as e:
+        print(f"Error enviando email de prueba: {str(e)}")
+        return False
