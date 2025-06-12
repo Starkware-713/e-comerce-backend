@@ -40,9 +40,9 @@ def read_root():
     return {"message": "Bienvenido a la api"}
 
 # Obtener el puerto de la variable de entorno o usar el predeterminado
-port = os.getenv("PORT")
+port = int(os.getenv("PORT", "8000"))
 
 # Para despliegue
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)
