@@ -1,8 +1,145 @@
 # 🛒 E-commerce API
 
-API construida con **FastAPI** y conectada a una base de datos **PostgreSQL**, que incluye autenticación segura, gestión de usuarios, carritos de compra y productos.
+API REST desarrollada con **FastAPI** y conectada a una base de datos **PostgreSQL**, que incluye autenticación JWT, gestión de usuarios con roles, carritos de compra, productos, órdenes, pagos y sistema de facturación.
+
+## ✨ Características Principales
+
+- 🔐 Autenticación JWT con tokens de acceso y refresco
+- 👥 Gestión de usuarios con roles (comprador, vendedor)
+- 🛒 Sistema de carrito de compras
+- 📦 Gestión de productos
+- 📋 Sistema de órdenes y ventas
+- 💳 Procesamiento de pagos con múltiples métodos
+- 📧 Envío de correos electrónicos de confirmación
+- 📄 Generación automática de facturas con IVA
+- 📚 Documentación automática con Swagger/OpenAPI
 
 ---
+
+## 🛠️ Endpoints de la API
+
+### 🔑 Autenticación (`/auth`)
+
+| Método | Endpoint          | Descripción                                |
+|--------|------------------|------------------------------------------|
+| POST   | `/auth/register` | Registro de usuarios (comprador/vendedor)  |
+| POST   | `/auth/login`    | Inicio de sesión y obtención de tokens    |
+| POST   | `/auth/refresh`  | Renovación de token de acceso             |
+
+### 👥 Usuarios (`/users`)
+
+| Método | Endpoint        | Descripción                    |
+|--------|----------------|--------------------------------|
+| POST   | `/users/`      | Crear nuevo usuario            |
+| GET    | `/users/`      | Listar usuarios (rol admin)    |
+| GET    | `/users/{id}`  | Obtener detalles de usuario    |
+
+### 📦 Productos (`/products`)
+
+| Método | Endpoint           | Descripción                |
+|--------|------------------|----------------------------|
+| POST   | `/products/`     | Crear producto (vendedor)   |
+| GET    | `/products/`     | Listar productos           |
+| GET    | `/products/{id}` | Obtener producto           |
+| PUT    | `/products/{id}` | Actualizar producto        |
+| DELETE | `/products/{id}` | Eliminar producto          |
+
+### 🛒 Carrito (`/carts`)
+
+| Método | Endpoint          | Descripción                |
+|--------|------------------|----------------------------|
+| POST   | `/carts/`        | Crear carrito             |
+| GET    | `/carts/`        | Ver carrito actual        |
+| POST   | `/carts/items`   | Agregar producto          |
+| DELETE | `/carts/items`   | Eliminar producto         |
+| PUT    | `/carts/items`   | Actualizar cantidad       |
+
+### 📋 Órdenes (`/orders`)
+
+| Método | Endpoint          | Descripción                |
+|--------|------------------|----------------------------|
+| POST   | `/orders/`       | Crear orden desde carrito  |
+| GET    | `/orders/`       | Listar órdenes            |
+| GET    | `/orders/{id}`   | Ver detalles de orden     |
+
+### 💳 Pagos (`/payment`)
+
+| Método | Endpoint            | Descripción                      |
+|--------|-------------------|----------------------------------|
+| POST   | `/payment/process` | Procesar pago de orden          |
+
+### 📊 Ventas (`/sales`)
+
+| Método | Endpoint          | Descripción                |
+|--------|------------------|----------------------------|
+| GET    | `/sales/`        | Listar ventas             |
+| GET    | `/sales/{id}`    | Ver detalles de venta     |
+
+## 📦 Modelos de Datos
+
+### Usuario
+- ID
+- Nombre
+- Apellido
+- Email
+- Contraseña (hasheada)
+- Rol (comprador/vendedor)
+- Estado activo
+
+### Producto
+- ID
+- Nombre
+- Descripción
+- Precio
+- Stock
+- Categoría
+- Vendedor ID
+
+### Carrito
+- ID
+- Usuario ID
+- Items
+- Total
+- Estado
+
+### Orden
+- ID
+- Usuario ID
+- Items
+- Total
+- Estado
+- Fecha de creación
+- Fecha de pago
+
+### Pago
+- ID
+- Orden ID
+- Monto
+- Método de pago
+- Estado
+- ID de transacción
+- Fecha
+
+### Venta
+- ID
+- Orden ID
+- Número de factura
+- Monto total
+- IVA
+- Estado
+- Fecha
+
+## 🔒 Seguridad y Autenticación
+
+### Autenticación JWT
+- Access Token (30 minutos)
+- Refresh Token (7 días)
+- Payload con rol de usuario
+
+### Roles y Permisos
+- 👤 Comprador: Gestión de carrito y órdenes
+- 🏪 Vendedor: Gestión de productos
+- 👑 Admin: Acceso total al sistema
 
 ## 📁 Estructura del Proyecto
 
@@ -177,28 +314,40 @@ La API utiliza autenticación basada en JWT (JSON Web Tokens) con:
 
 ---
 
+## 🔧 Variables de Entorno Requeridas
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+PORT=8000
+EMAIL_ADDRESS=your-email@gmail.com
+EMAIL_PASSWORD=your-email-password
+```
+
 ## 🧰 Solución de Problemas
 
 ### ❌ Error de Conexión a la Base de Datos
-
 * Asegúrate de que PostgreSQL está activo
 * Verifica las credenciales del archivo `.env`
 * Confirma que la base de datos fue creada
 
 ### ⚠️ Error al Activar el Entorno Virtual
-
 ```bash
 Set-ExecutionPolicy RemoteSigned
 ```
-
 > Ejecutar como administrador en PowerShell
 
 ### 🐍 Problemas con Dependencias
-
 ```bash
 python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-> Luego reinstala: `pip install -r requirements.txt`
+## 📦 Estado del Proyecto
 
----
+En desarrollo activo. Versión actual: 1.0.0
+
+## 📚 Documentación API
+
+La documentación completa de la API está disponible en:
+- 🔍 Swagger UI: `http://localhost:8000/docs`
+- 📖 ReDoc: `http://localhost:8000/redoc`
