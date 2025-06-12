@@ -75,59 +75,21 @@ API REST desarrollada con **FastAPI** y conectada a una base de datos **PostgreS
 | GET    | `/sales/`        | Listar ventas             |
 | GET    | `/sales/{id}`    | Ver detalles de venta     |
 
-## 📦 Modelos de Datos
 
-### Usuario
-- ID
-- Nombre
-- Apellido
-- Email
-- Contraseña (hasheada)
-- Rol (comprador/vendedor)
-- Estado activo
+## 📦 Modelo de Datos
 
-### Producto
-- ID
-- Nombre
-- Descripción
-- Precio
-- Stock
-- Categoría
-- Vendedor ID
+![Modelo de Datos](docs/modelo%20de%20datos.png)
 
-### Carrito
-- ID
-- Usuario ID
-- Items
-- Total
-- Estado
+| Entidad   | Atributos |
+|-----------|-----------|
+| **Usuario** | ID, Nombre, Apellido, Email, Contraseña (hasheada), Rol (comprador/vendedor), Estado activo |
+| **Producto** | ID, Nombre, Descripción, Precio, Stock, Categoría, Vendedor ID |
+| **Carrito** | ID, Usuario ID, Items, Total, Estado |
+| **Orden** | ID, Usuario ID, Items, Total, Estado, Fecha de creación, Fecha de pago |
+| **Pago** | ID, Orden ID, Monto, Método de pago, Estado, ID de transacción, Fecha |
+| **Venta** | ID, Orden ID, Número de factura, Monto total, IVA, Estado, Fecha |
 
-### Orden
-- ID
-- Usuario ID
-- Items
-- Total
-- Estado
-- Fecha de creación
-- Fecha de pago
-
-### Pago
-- ID
-- Orden ID
-- Monto
-- Método de pago
-- Estado
-- ID de transacción
-- Fecha
-
-### Venta
-- ID
-- Orden ID
-- Número de factura
-- Monto total
-- IVA
-- Estado
-- Fecha
+---
 
 ## 🔒 Seguridad y Autenticación
 
