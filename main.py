@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-from app.database import engine, Base, create_tables
-from app.routers import users, carts, products, auth, orders, sales, order_management
+from app.database import engine, Base
+from app.routers import users, carts, products, auth, orders, sales, order_management, payment
 
 # Carga de variables de entorno
 load_dotenv()
@@ -36,6 +36,7 @@ app.include_router(products.router) #rutas de productos
 app.include_router(orders.router) #rutas de órdenes
 app.include_router(order_management.router) #rutas de gestión de órdenes
 app.include_router(sales.router) #rutas de ventas
+app.include_router(payment.router) #rutas de pagos
 
 @app.get("/")
 def read_root():
