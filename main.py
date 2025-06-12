@@ -16,9 +16,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Crear las tablas en la base de datos
-create_tables()
-
 # Agregar middleware CORS
 app.add_middleware(
     CORSMiddleware,
@@ -43,9 +40,9 @@ def read_root():
     return {"message": "Bienvenido a la api"}
 
 # Obtener el puerto de la variable de entorno o usar el predeterminado
-port = 8000
+port = os.getenv("PORT")
 
 # Para despliegue
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="127.0.0.1", port=port)

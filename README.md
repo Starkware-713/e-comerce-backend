@@ -214,49 +214,6 @@ uvicorn main:app --reload
 
 ---
 
-## 🔄 Endpoints de la API
-
-### 🔐 Autenticación
-
-| Método | Endpoint          | Descripción                                      | Acceso     |
-| ------ | ---------------- | ------------------------------------------------ | ---------- |
-| POST   | `/auth/register` | Registrar nuevo usuario (comprador/vendedor)      | Público    |
-| POST   | `/auth/login`    | Iniciar sesión y obtener tokens                  | Público    |
-| POST   | `/auth/refresh`  | Renovar token de acceso usando refresh token     | Público    |
-
-### 👤 Usuarios
-
-| Método | Endpoint           | Descripción                 | Acceso      |
-| ------ | ----------------- | --------------------------- | ----------- |
-| POST   | `/users/`         | Crear nuevo usuario         | Público     |
-| GET    | `/users/`         | Listar todos los usuarios   | Admin       |
-| GET    | `/users/{id}`     | Obtener usuario por ID      | Autenticado |
-| PUT    | `/users/{id}`     | Actualizar usuario          | Autenticado |
-| DELETE | `/users/{id}`     | Eliminar usuario            | Admin       |
-
-### 📦 Productos
-
-| Método | Endpoint           | Descripción                | Acceso      |
-| ------ | ----------------- | -------------------------- | ----------- |
-| POST   | `/products/`      | Crear nuevo producto       | Vendedor    |
-| GET    | `/products/`      | Listar todos los productos | Público     |
-| GET    | `/products/{id}`  | Obtener producto por ID    | Público     |
-| PUT    | `/products/{id}`  | Actualizar producto        | Vendedor    |
-| DELETE | `/products/{id}`  | Eliminar producto          | Vendedor    |
-
-### 🛍️ Carritos de Compra
-
-| Método | Endpoint                    | Descripción                      | Acceso      |
-| ------ | -------------------------- | -------------------------------- | ----------- |
-| POST   | `/carts/`                  | Crear nuevo carrito              | Autenticado |
-| GET    | `/carts/`                  | Listar carritos del usuario      | Autenticado |
-| GET    | `/carts/{id}`              | Obtener carrito por ID          | Autenticado |
-| POST   | `/carts/{id}/items`        | Agregar producto al carrito     | Autenticado |
-| DELETE | `/carts/{id}/items/{item}` | Eliminar producto del carrito   | Autenticado |
-| PUT    | `/carts/{id}/checkout`     | Procesar compra del carrito     | Autenticado |
-
----
-
 ## 📚 Documentación Detallada
 
 ### 🔑 Autenticación y Autorización
