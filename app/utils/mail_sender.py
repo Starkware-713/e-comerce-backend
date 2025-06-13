@@ -141,3 +141,62 @@ def send_test_email(to_email: str) -> bool:
     except Exception as e:
         print(f"Error enviando email de prueba: {str(e)}")
         return False
+
+def send_welcome_email(to_email: str, username: str) -> bool:
+    try:
+        message = MIMEMultipart()
+        message["From"] = email_address
+        message["To"] = to_email
+        message["Subject"] = "¡Bienvenido a nuestra plataforma!"
+
+        html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f8fa;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="text-align: center; background-color: #1a73e8; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                        <h1 style="color: white; margin: 0;">¡Bienvenido {username}!</h1>
+                    </div>
+                    
+                    <div style="color: #333; line-height: 1.6;">
+                        <p style="font-size: 16px;">Nos alegra mucho tenerte con nosotros. Tu cuenta ha sido creada exitosamente y ahora puedes disfrutar de todos nuestros servicios.</p>
+                        
+                        <div style="background-color: #e8f0fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3 style="color: #1a73e8; margin-top: 0;">¿Qué puedes hacer ahora?</h3>
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="margin-bottom: 10px; padding-left: 24px; position: relative;">
+                                    <span style="color: #1a73e8; position: absolute; left: 0;">✓</span>
+                                    Explorar nuestro catálogo de productos
+                                </li>
+                                <li style="margin-bottom: 10px; padding-left: 24px; position: relative;">
+                                    <span style="color: #1a73e8; position: absolute; left: 0;">✓</span>
+                                    Crear tu primera orden
+                                </li>
+                                <li style="margin-bottom: 10px; padding-left: 24px; position: relative;">
+                                    <span style="color: #1a73e8; position: absolute; left: 0;">✓</span>
+                                    Gestionar tu perfil
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p style="font-size: 16px;">Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <p style="color: #666; font-size: 14px;">¡Gracias por elegirnos!</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+        """
+
+        message.attach(MIMEText(html, "html"))
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_address, smtp_port, context=context) as server:
+            server.login(email_address, email_password)
+            server.send_message(message)
+            
+        return True
+    except Exception as e:
+        print(f"Error enviando email de bienvenida: {str(e)}")
+        return False

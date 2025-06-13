@@ -13,6 +13,7 @@ from app.utils import (
 )
 from app.models import user as models
 from app.utils import get_password_hash
+from app.utils.mail_sender import send_welcome_email
 
 router = APIRouter(
     prefix="/auth",
@@ -50,6 +51,8 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
     hashed_password = get_password_hash(user_data.password)
     db_user = models.User(
         email=user_data.email,
+        name=user_data.name,
+        lastname=user_data.lastname,
         hashed_password=hashed_password,
         rol=user_data.rol
     )
@@ -58,6 +61,12 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+        
+        # Enviar email de bienvenida
+        send_welcome_email(
+            to_email=db_user.email,
+            username=user_data.name
+        )
         
         # Generar tokens
         access_token = create_access_token(
