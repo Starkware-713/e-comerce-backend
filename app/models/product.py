@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean
-from app.models import Base
+from sqlalchemy.orm import relationship
+from app.database import Base
+
 class Product(Base):
     __tablename__ = "products"
 
@@ -9,3 +11,5 @@ class Product(Base):
     price = Column(Integer)  
     is_active = Column(Boolean, default=True)  
     category = Column(Integer, index=True) 
+    
+    sale_items = relationship("SaleItem", back_populates="product")

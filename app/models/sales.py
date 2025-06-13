@@ -2,6 +2,9 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models.product import Product
+from app.models.orders import Order
+from app.models.user import User
 import enum
 
 class PaymentStatus(str, enum.Enum):
@@ -47,24 +50,19 @@ class Sale(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     invoice_number = Column(Integer, unique=True, index=True)
+    order_number = Column(String, unique=True, index=True)
     total_amount = Column(Float, nullable=False)
     tax_amount = Column(Float, nullable=False)
     payment_id = Column(Integer, ForeignKey("payments.id"))
-    status = Column(String, default=PaymentStatus.PENDING)
+    status = Column(String, default="pending")  # pending, completed, cancelled
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    cancelled_at = Column(DateTime, nullable=True)
     
     items = relationship("SaleItem", back_populates="sale")
     order = relationship("Order")
     payment = relationship("Payment")
-    order_number = Column(String, unique=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    status = Column(String, default="pending")  # pending, completed, cancelled
-    total_amount = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    completed_at = Column(DateTime, nullable=True)
-    cancelled_at = Column(DateTime, nullable=True)
-    
     user = relationship("User")
-    items = relationship("SaleItem", back_populates="sale")
