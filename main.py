@@ -39,6 +39,10 @@ app.include_router(payment.router) #rutas de pagos
 def read_root():
     return {"message": "Bienvenido a la api"}
 
+@app.get("/health-check")
+def health_check():
+    return {"status": "ok", "message": "Estoy vivo!"}
+
 # Obtener el puerto de la variable de entorno o usar el predeterminado
 port = int(os.getenv("PORT", "8000"))
 
