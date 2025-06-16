@@ -66,7 +66,7 @@ def read_user(
         print(f"Error leyendo el usuario: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-@router.get("/profile", response_model=schemas.User)
+@router.get("/my-profile", response_model=schemas.User)
 def get_user_profile(current_user: User = Depends(get_current_user)):
     try:
         return current_user
