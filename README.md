@@ -1,13 +1,369 @@
-# 🛒 E-commerce API
+# E-Commerce Backend API
 
-API REST desarrollada con **FastAPI** y conectada a una base de datos **PostgreSQL**, que incluye autenticación JWT, gestión de usuarios con roles, carritos de compra, productos, órdenes, pagos y sistema de facturación.
+Esta API proporciona los endpoints necesarios para gestionar un e-commerce, incluyendo autenticación, gestión de usuarios, productos, carritos y órdenes.
 
-## ✨ Características Principales
+## Configuración Base
 
-- 🔐 Autenticación JWT con tokens de acceso y refresco
-- 👥 Gestión de usuarios con roles (comprador, vendedor)
-- 🛒 Sistema de carrito de compras
-- 📦 Gestión de productos
+La API está desplegada en: `https://e-comerce-backend-kudw.onrender.com`
+
+Para todas las peticiones que requieren autenticación, incluir el token JWT en el header:
+```typescript
+headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+## Autenticación
+
+### Registro de Usuario
+```typescript
+POST /auth/register
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "password": "Contraseña123!",
+  "confirm_password": "Contraseña123!",
+  "name": "Nombre",
+  "lastname": "Apellido",
+  "rol": "comprador" // o "vendedor"
+}
+```
+
+### Iniciar Sesión
+```typescript
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario@ejemplo.com",
+  "password": "Contraseña123!"
+}
+
+// Respuesta
+{
+  "access_token": "...",
+  "refresh_token": "...",
+  "token_type": "bearer"
+}
+```
+
+## Gestión de Usuario
+
+### Obtener Perfil
+```typescript
+GET /user/my-profile
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+
+// Respuesta
+{
+  "id": 1,
+  "email": "usuario@ejemplo.com",
+  "name": "Nombre",
+  "lastname": "Apellido",
+  "is_active": true,
+  "rol": "comprador"
+}
+```
+
+### Actualizar Perfil
+```typescript
+PUT /user/update-profile
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+Content-Type: application/json
+
+{
+  "name": "Nuevo Nombre",      // opcional
+  "lastname": "Nuevo Apellido",// opcional
+  "email": "nuevo@email.com"   // opcional
+}
+```
+
+### Cambiar Contraseña
+```typescript
+POST /user/change-password
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+Content-Type: application/json
+
+{
+  "current_password": "Contraseña123!",
+  "new_password": "NuevaContraseña123!",
+  "confirm_password": "NuevaContraseña123!"
+}
+```
+
+## Gestión de Productos
+
+### Listar Productos
+```typescript
+GET /products
+Query params:
+- skip: number (opcional, por defecto 0)
+- limit: number (opcional, por defecto 100)
+```
+
+### Buscar Productos
+```typescript
+GET /products/search?q=término
+```
+
+### Obtener Producto por ID
+```typescript
+GET /products/{product_id}
+```
+
+### Crear Producto (Solo vendedores)
+```typescript
+POST /products
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+Content-Type: application/json
+
+{
+  "name": "Nombre del producto",
+  "description": "Descripción detallada",
+  "price": 99.99,
+  "stock": 100,
+  "category": "Categoría"
+}
+```
+
+## Carrito de Compras
+
+### Obtener Carrito
+```typescript
+GET /cart
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+### Agregar Producto al Carrito
+```typescript
+POST /cart/add
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "quantity": 2
+}
+```
+
+### Actualizar Cantidad
+```typescript
+PUT /cart/update
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "quantity": 3
+}
+```
+
+### Eliminar Producto del Carrito
+```typescript
+DELETE /cart/remove/{product_id}
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+## Órdenes
+
+### Crear Orden
+```typescript
+POST /orders
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+### Listar Órdenes del Usuario
+```typescript
+GET /orders
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+### Obtener Orden por ID
+```typescript
+GET /orders/{order_id}
+Headers: {
+  'Authorization': 'Bearer ' + token
+}
+```
+
+## Validaciones
+
+### Contraseña
+La contraseña debe cumplir con los siguientes requisitos:
+- Mínimo 8 caracteres
+- Al menos una letra mayúscula
+- Al menos una letra minúscula
+- Al menos un número
+- Al menos un carácter especial
+
+### Roles
+- `comprador`: Puede comprar productos
+- `vendedor`: Puede vender productos y gestionar su inventario
+
+## Manejo de Errores
+
+La API devuelve errores en el siguiente formato:
+```json
+{
+  "detail": "Mensaje descriptivo del error"
+}
+```
+
+Códigos de error comunes:
+- 400: Error de validación o datos inválidos
+- 401: No autenticado o token inválido
+- 403: No autorizado para realizar la acción
+- 404: Recurso no encontrado
+- 500: Error interno del servidor
+
+## Ejemplos de Integración
+
+### Angular - Servicio de Autenticación
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private apiUrl = 'https://e-comerce-backend-kudw.onrender.com';
+
+  constructor(private http: HttpClient) {}
+
+  login(email: string, password: string) {
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, {
+      email,
+      password
+    }).pipe(
+      tap(response => {
+        localStorage.setItem('token', response.access_token);
+        localStorage.setItem('refresh_token', response.refresh_token);
+      })
+    );
+  }
+
+  getProfile() {
+    return this.http.get<any>(`${this.apiUrl}/user/my-profile`);
+  }
+
+  // Interceptor para agregar el token a todas las peticiones
+  intercept(request: HttpRequest<any>, next: HttpHandler) {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      request = request.clone({
+        headers: request.headers.set('Authorization', `Bearer ${token}`)
+      });
+    }
+    
+    return next.handle(request);
+  }
+}
+```
+
+### Angular - Servicio de Productos
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class ProductService {
+  private apiUrl = 'https://e-comerce-backend-kudw.onrender.com/products';
+
+  constructor(private http: HttpClient) {}
+
+  getProducts(skip = 0, limit = 10) {
+    return this.http.get<any>(`${this.apiUrl}?skip=${skip}&limit=${limit}`);
+  }
+
+  searchProducts(query: string) {
+    return this.http.get<any>(`${this.apiUrl}/search?q=${query}`);
+  }
+
+  getProduct(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+}
+```
+
+### Angular - Servicio de Carrito
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class CartService {
+  private apiUrl = 'https://e-comerce-backend-kudw.onrender.com/cart';
+
+  constructor(private http: HttpClient) {}
+
+  getCart() {
+    return this.http.get<any>(this.apiUrl);
+  }
+
+  addToCart(productId: number, quantity: number) {
+    return this.http.post<any>(`${this.apiUrl}/add`, {
+      product_id: productId,
+      quantity
+    });
+  }
+
+  updateQuantity(productId: number, quantity: number) {
+    return this.http.put<any>(`${this.apiUrl}/update`, {
+      product_id: productId,
+      quantity
+    });
+  }
+
+  removeFromCart(productId: number) {
+    return this.http.delete<any>(`${this.apiUrl}/remove/${productId}`);
+  }
+}
+```
+
+## Recomendaciones de Implementación
+
+1. Manejo de Tokens:
+   - Guarda el token en localStorage o sessionStorage
+   - Implementa un interceptor HTTP para incluir el token en todas las peticiones
+   - Maneja la renovación automática del token cuando expire
+
+2. Manejo de Errores:
+   - Implementa un interceptor HTTP para manejar errores de forma centralizada
+   - Muestra mensajes de error amigables al usuario
+   - Redirecciona al login cuando recibas un 401
+
+3. Estado del Carrito:
+   - Mantén el estado del carrito en un servicio
+   - Actualiza el contador del carrito en tiempo real
+   - Implementa persistencia local para el carrito
+
+4. Caché:
+   - Implementa caché para los productos más visitados
+   - Usa BehaviorSubject para compartir el estado entre componentes
+   - Implementa una estrategia de recarga de datos
+
+5. Optimizaciones:
+   - Implementa paginación en las listas de productos
+   - Usa lazy loading para las imágenes
+   - Implementa debounce en las búsquedas
 - 📋 Sistema de órdenes y ventas
 - 💳 Procesamiento de pagos con múltiples métodos
 - 📧 Envío de correos electrónicos de confirmación

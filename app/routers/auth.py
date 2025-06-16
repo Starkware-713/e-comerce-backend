@@ -90,7 +90,10 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
         )
 
 @router.post("/login", response_model=schemas.Token)
-async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+async def login(
+    login_data: schemas.LoginRequest,
+    db: Session = Depends(get_db)
+):
     user = authenticate_user(db, login_data.email, login_data.password)
     if not user:
         raise HTTPException(
@@ -98,6 +101,15 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
             detail="Email o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    access_token = create_access_token(data={"sub": user.email, "rol": user.rol})
+    refresh_token = create_refresh_token(data={"sub": user.email, "rol": user.rol})
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
     
     access_token = create_access_token(
         data={"sub": user.email, "rol": user.rol}
