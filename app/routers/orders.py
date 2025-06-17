@@ -54,6 +54,13 @@ async def get_orders(
             query = query.order_by(desc(Order.created_at))  # Default newest first
             
         orders = query.offset(skip).limit(limit).all()
+        
+        if not orders:
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "No hay órdenes para el usuario"}
+            )
+            
         return orders
         
     except Exception as e:
