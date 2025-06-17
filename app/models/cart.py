@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from app.models import Base
 from app.models.user import User
@@ -21,6 +21,9 @@ class Cart(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     status = Column(String, default="active")  # e.g., active, completed, cancelled
+    coupon_id = Column(Integer, ForeignKey("coupons.id"), nullable=True)
+    discount_amount = Column(Float, default=0.0)
     
     user = relationship("User")
     items = relationship("CartItem", back_populates="cart")
+    coupon = relationship("Coupon")
