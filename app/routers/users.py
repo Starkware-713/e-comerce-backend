@@ -42,7 +42,7 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(check_rol(["admin"]))
+    current_user: User = Depends(check_rol(["vendedor"]))
 ):
     try:
         users = db.query(models.User).offset(skip).limit(limit).all()
@@ -51,7 +51,7 @@ def read_users(
         print(f"Error leyendo usuarios: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-@router.get("/my-profile", response_model=schemas.User)
+@router.get("/profile", response_model=schemas.User)
 def get_user_profile(current_user: User = Depends(get_current_user)):
     try:
         return current_user
