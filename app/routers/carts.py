@@ -6,6 +6,8 @@ from app.models import cart as models
 from app.schemas import cart as schemas
 from app.utils import get_current_user
 from app.models.user import User
+from app.models.coupon import Coupon
+from datetime import datetime
 
 router = APIRouter(
     prefix="/carts",
@@ -178,8 +180,56 @@ def delete_product_from_cart(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
 
-#Checkout de carrito y actualizacion del estado del carrito. 
-#ACTUALIZAR LA FUNCION UNA VEZ TERMINADO TODO PARA PODER HACER EL ENVIO DE MAIL
+@router.post("/{cart_id}/apply-coupon", response_model=schemas.Cart)
+async def apply_coupon(
+    cart_id: int,
+    coupon_request: schemas.ApplyCouponRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        # Verificar si el carrito existe y pertenece al usuario
+        cart = db.query(models.Cart).filter(
+            models.Cart.id == cart_id,
+            models.Cart.user_id == current_user.id,
+            models.Cart.status == "active"
+        ).first()
+        
+        if not cart:
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no está activo")
+
+        # Validar el cupón
+        coupon = db.query(Coupon).filter(Coupon.code == coupon_request.code).first()
+        if not coupon:
+            raise HTTPException(status_code=404, detail="Cupón no encontrado")
+
+        if not coupon.is_active:
+            raise HTTPException(status_code=400, detail="Cupón no está activo")
+
+        if coupon.current_uses >= coupon.max_uses:
+            raise HTTPException(status_code=400, detail="Cupón ha alcanzado el máximo de usos")
+
+        now = datetime.utcnow()
+        if now < coupon.valid_from or now > coupon.valid_until:
+            raise HTTPException(status_code=400, detail="Cupón no es válido en este momento")
+
+        # Calcular el descuento
+        total = sum(item.quantity * item.product.price for item in cart.items)
+        discount = total * (coupon.discount_percent / 100)
+
+        # Actualizar el carrito con el cupón
+        cart.coupon_id = coupon.id
+        cart.discount_amount = discount
+
+        db.commit()
+        db.refresh(cart)
+        return cart
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
+
+# Modificar la función de checkout para incluir el manejo de cupones
 @router.put("/{cart_id}/checkout", response_model=schemas.Cart)
 def checkout_cart(
     cart_id: int,
@@ -187,12 +237,28 @@ def checkout_cart(
     current_user: User = Depends(get_current_user)
 ):
     try:
-        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
+        cart = db.query(models.Cart).filter(
+            models.Cart.id == cart_id,
+            models.Cart.user_id == current_user.id,
+            models.Cart.status == "active"
+        ).first()
+        
         if not cart:
-            raise HTTPException(status_code=404, detail="Carrito no encontrado o no pertenece al usuario")
-        cart.checked_out = True
+            raise HTTPException(status_code=404, detail="Carrito no encontrado o no está activo")
+
+        # Si hay un cupón aplicado, incrementar su contador de usos
+        if cart.coupon_id:
+            coupon = db.query(Coupon).filter(Coupon.id == cart.coupon_id).first()
+            if coupon:
+                coupon.current_uses += 1
+                if coupon.current_uses >= coupon.max_uses:
+                    coupon.is_active = False
+
+        cart.status = "completed"
         db.commit()
+        db.refresh(cart)
         return cart
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")

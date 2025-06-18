@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-from app.database import engine, Base
-from app.routers import users, carts, products, auth, orders, sales, order_management, payment
+from app.database import engine, Base, create_tables
+from app.routers import users, carts, products, auth, orders, sales, order_management, payment, mail
 
 # Carga de variables de entorno
 load_dotenv()
@@ -15,6 +15,9 @@ app = FastAPI(
     description="API para una webapp de e-commerce utilizando FastAPI y PostgreSQL",
     version="1.0.0"
 )
+
+# Crear las tablas de la base de datos
+create_tables()
 
 # Agregar middleware CORS
 app.add_middleware(
@@ -34,6 +37,7 @@ app.include_router(orders.router) #rutas de órdenes
 app.include_router(order_management.router) #rutas de gestión de órdenes
 app.include_router(sales.router) #rutas de ventas
 app.include_router(payment.router) #rutas de pagos
+app.include_router(mail.router) #rutas de envío de correos
 
 @app.get("/")
 def read_root():

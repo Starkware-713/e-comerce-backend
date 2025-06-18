@@ -227,10 +227,10 @@ Respuesta:
 ```bash
 .
 ├── app/
-│   ├── models/
-│   ├── routers/
-│   ├── schemas/
-│   ├── utils/
+│   ├── models/ #Modelos 
+│   ├── routers/ #Rutas
+│   ├── schemas/ # Esquemas de la base de datos
+│   ├── utils/ #funcionalidades en general
 │   └── database.py
 ├── main.py
 ├── requirements.txt
