@@ -29,7 +29,15 @@ from app.models.sales import Sale
 
 # Crear todas las tablas
 def create_tables():
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Tables created successfully")
+    except SQLAlchemyError as e:
+        print(f"Error creating tables: {e}")
+        raise HTTPException(status_code=500, detail="Error creating database tables")
+
+# Create tables when the application starts
+create_tables()
 
 def get_db():
     try:
