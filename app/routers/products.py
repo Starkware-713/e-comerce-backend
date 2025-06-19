@@ -32,6 +32,20 @@ def create_product(
         print(f"Error creando el producto: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
+@router.post("/search" , response_model=List[schemas.Product], toFind=str)
+def search_products(
+    toFind: str,
+    db: Session = Depends(get_db)
+):
+    try:
+        products = db.query(models.Product).filter(
+            models.Product.name.ilike(f"%{toFind}%") |
+            models.Product.description.ilike(f"%{toFind}%")
+        ).all()
+        return products
+    except Exception as e:
+        print(f"Error buscando productos: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 # Listar todos los productos
 @router.get("/", response_model=List[schemas.Product])
