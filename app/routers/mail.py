@@ -10,8 +10,8 @@ from app.schemas.email import (
     EmailResponse,
     EmailType
 )
-from app.services.email_service import generate_email_content, get_template_prompt
-from app.utils.mail_sender import send_order_confirmation
+from app.utils.ai import generate_ai_completion
+from app.utils.mail_sender import send_marketing_email, send_welcome_email, send_order_confirmation, send_payment_confirmation
 from typing import Optional
 
 router = APIRouter(
@@ -19,95 +19,72 @@ router = APIRouter(
     tags=["email"]
 )
 
-@router.post("/send", response_model=EmailResponse)
-async def send_email(request: EmailRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """
-    Send an email with AI-generated content based on template and context
-    """
-    try:
-        # Generate HTML content
-        html_content = generate_email_content(
-            template=request.template,
-            user_context=request.user_context,
-            content_variables=request.content_variables
-        )
-        
-        if not html_content:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to generate email content"
-            )
-        
-        # Send email using existing mail_sender functionality
-        success = send_order_confirmation(
-            to_email=request.to_email,
-            subject=request.subject,
-            content=html_content
-        )
-        
-        if not success:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to send email"
-            )
-        
-        return EmailResponse(
-            message="Email sent successfully",
-            preview_html=html_content
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
-
-@router.post("/preview", response_class=HTMLResponse)
-async def preview_email(
-    request: PreviewEmailRequest,
+@router.post("/prompt-IA")
+def send_prompt_to_groq(
+    request: EmailRequest,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    try:
+        prompt = request.template.prompt
+        system_message = "Eres un experto en diseño de emails. Genera un HTML de email profesional y responsivo según el siguiente prompt. devuelve solamente el HTML sin etiquetas adicionales ni explicaciones."
+        html_content = generate_ai_completion(prompt, system_message)
+        if not html_content:
+            raise Exception("No se pudo generar el HTML del email.")
+        return EmailResponse(message="HTML generado exitosamente", preview_html=html_content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/send-email")
+def send_email(request: EmailRequest):
     """
-    Generate and preview email content without sending it
+    Envía un email real usando el HTML generado y los datos del request.
     """
     try:
-        html_content = generate_email_content(
-            template=request.template,
-            user_context=request.user_context,
-            content_variables=request.content_variables
-        )
-        
-        if not html_content:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to generate email preview"
+        # Determinar el tipo de email y enviar usando la función adecuada
+        if request.template.type == EmailType.MARKETING:
+            # Usar el HTML generado en el prompt como cuerpo
+            html_content = request.template.prompt
+            enviado = send_marketing_email(
+                to_email=request.to_email,
+                subject=request.subject,
+                content=html_content,
+                marketing_message=html_content
             )
-        
-        return HTMLResponse(content=html_content)
-        
+        elif request.template.type == EmailType.WELCOME:
+            username = request.user_context.name if request.user_context else "Usuario"
+            enviado = send_welcome_email(
+                to_email=request.to_email,
+                username=username
+            )
+        elif request.template.type == EmailType.ORDER_CONFIRMATION:
+            # Se requieren variables: order_number, total_amount, items
+            vars = request.content_variables or {}
+            enviado = send_order_confirmation(
+                to_email=request.to_email,
+                order_number=vars.get("order_number", ""),
+                total_amount=vars.get("total_amount", 0),
+                items=vars.get("items", [])
+            )
+        elif request.template.type == EmailType.PROMOTION:
+            html_content = request.template.prompt
+            enviado = send_marketing_email(
+                to_email=request.to_email,
+                subject=request.subject,
+                content=html_content,
+                marketing_message=html_content
+            )
+        else:
+            # Por defecto, enviar como marketing
+            html_content = request.template.prompt
+            enviado = send_marketing_email(
+                to_email=request.to_email,
+                subject=request.subject,
+                content=html_content,
+                marketing_message=html_content
+            )
+        if not enviado:
+            raise Exception("No se pudo enviar el email.")
+        return JSONResponse(content={"message": "Email enviado exitosamente"})
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
-
-@router.get("/templates/{email_type}")
-async def get_default_template(
-    email_type: EmailType,
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get default template prompt for a specific email type
-    """
-    prompt = get_template_prompt(email_type)
-    
-    if not prompt:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No default template found for type: {email_type}"
-        )
-    
-    return {
-        "type": email_type,
-        "prompt": prompt
-    }
+        raise HTTPException(status_code=500, detail=str(e))

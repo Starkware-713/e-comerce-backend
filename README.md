@@ -74,6 +74,7 @@ source .venv/bin/activate
 # Windows
 .venv\Scripts\activate
 
+.venv\Scripts\Activate.ps1 #script para activar el entorno virtual usando Microsoft Powershell
 # 3. Instalar dependencias
 pip install -r requirements.txt
 
