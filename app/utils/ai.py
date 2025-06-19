@@ -12,7 +12,7 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
-def generate_ai_completion(prompt: str, system_message: str = "You are a helpful assistant."):
+def generate_ai_completion(prompt: str, system_message: str = "Eres un experto en diseño de emails. Genera un HTML de email profesional y responsivo según el siguiente prompt. Devuelve solamente el HTML sin etiquetas adicionales ni explicaciones. hazlo bonito y con una gama de colores azules y verdes."):
     """
     Generate completion using Groq AI
     """
@@ -28,7 +28,7 @@ def generate_ai_completion(prompt: str, system_message: str = "You are a helpful
                     "content": prompt
                 }
             ],
-            model="mixtral-8x7b-32768",
+            model="llama-3.1-8b-instant",
             temperature=0.7,
             max_tokens=2048,
             top_p=1,

@@ -32,7 +32,7 @@ def create_product(
         print(f"Error creando el producto: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-@router.post("/search" , response_model=List[schemas.Product], toFind=str)
+@router.post("/search", response_model=List[schemas.Product])
 def search_products(
     toFind: str,
     db: Session = Depends(get_db)
