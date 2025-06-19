@@ -49,6 +49,7 @@ def read_carts(
     try:
         carts = (
             db.query(models.Cart)
+            .filter(models.Cart.user_id == current_user.id)  # Solo carritos del usuario autenticado
             .options(
                 joinedload(models.Cart.user),
                 joinedload(models.Cart.items).joinedload(models.CartItem.product)

@@ -56,7 +56,7 @@ def read_products(
     category: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
-    sort: Optional[str] = Query(None, enum=["price_asc", "price_desc", "newest"]),
+    sort: Optional[str] = Query("none", enum=["none", "price_asc", "price_desc", "newest"]),
     in_stock: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
@@ -89,7 +89,7 @@ def read_products(
             query = query.order_by(desc(models.Product.price))
         elif sort == "newest":
             query = query.order_by(desc(models.Product.created_at))
-            
+        # Si sort es 'none', no se aplica ningún ordenamiento
         products = query.offset(skip).limit(limit).all()
         return products
     except Exception as e:
