@@ -102,6 +102,36 @@ async def update_profile(
         print(f"Error actualizando el usuario: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
+@router.put("/update/{user_id}", response_model=schemas.User)
+def update_user_rol(
+    user_id: int,
+    user_data: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_rol(["vendedor"]))
+):
+    try:
+        db_user = db.query(models.User).filter(models.User.id == user_id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar solo los campos proporcionados
+        if user_data.name is not None:
+            db_user.name = user_data.name
+        if user_data.lastname is not None:
+            db_user.lastname = user_data.lastname
+        if user_data.email is not None:
+            existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
+            if existing_user and existing_user.id != user_id:
+                raise HTTPException(status_code=400, detail="Email ya registrado")
+            db_user.email = user_data.email
+        
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except Exception as e:
+        print(f"Error actualizando el usuario: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
 @router.post("/change-password")
 async def change_password(
     password_data: schemas.ChangePassword,
