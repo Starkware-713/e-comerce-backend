@@ -79,7 +79,8 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(get
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
+            "rol": db_user.rol
         }
     
     except Exception as e:
@@ -108,7 +109,8 @@ async def login(
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "rol": user.rol
     }
     
     access_token = create_access_token(
@@ -121,7 +123,8 @@ async def login(
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "rol": user.rol
     }
 
 @router.post("/refresh", response_model=schemas.Token)

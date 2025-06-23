@@ -11,5 +11,6 @@ class Product(Base):
     price = Column(Integer)  
     is_active = Column(Boolean, default=True)  
     category = Column(Integer, index=True) 
-    
+    sku = Column(Integer)
+
     sale_items = relationship("SaleItem", back_populates="product")

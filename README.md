@@ -197,7 +197,7 @@ Respuesta:
 
 ## 📦 Modelo de Datos
 
-![Modelo de Datos](docs/modelo%20de%20datos.png)
+![Modelo de Datos](docs/modelo%20de%20datos.jpg)
 
 ### Entidades Principales
 
