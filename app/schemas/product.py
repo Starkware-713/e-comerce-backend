@@ -49,8 +49,8 @@ class Product(ProductBase):
     is_active: bool = Field(default=True, description="Indica si el producto está activo")
     created_at: datetime
     updated_at: Optional[datetime]
-    created_by: int
-    updated_by: Optional[int]
+    created_by: Optional[int] = None
+    updated_by: Optional[int] = None
 
     class Config:
         from_attributes = True

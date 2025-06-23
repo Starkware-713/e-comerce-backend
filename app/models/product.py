@@ -18,7 +18,7 @@ class Product(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
     updated_at = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
-    created_by = Column(Integer, nullable=False)
+    created_by = Column(Integer, nullable=True)
     updated_by = Column(Integer, nullable=True)
 
     sale_items = relationship("SaleItem", back_populates="product")
