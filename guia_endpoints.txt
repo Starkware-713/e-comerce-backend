@@ -1,0 +1,227 @@
+# Guía de Consumo de Endpoints API E-commerce
+
+## Notas Generales
+- Todos los endpoints (excepto registro y login) requieren autenticación JWT en el header:
+  Authorization: Bearer {access_token}
+- Los datos se envían y reciben en formato JSON.
+- Los roles permitidos son: "comprador", "vendedor".
+
+---
+
+## 1. Autenticación
+
+### Registro
+POST /auth/register
+Body:
+{
+  "email": "usuario@ejemplo.com",
+  "password": "Contraseña123!",
+  "confirm_password": "Contraseña123!",
+  "name": "Nombre",
+  "lastname": "Apellido",
+  "rol": "comprador"
+}
+
+### Login
+POST /auth/login
+Body:
+{
+  "email": "usuario@ejemplo.com",
+  "password": "Contraseña123!"
+}
+
+### Refrescar Token
+POST /auth/refresh
+Body:
+{
+  "refresh_token": "..."
+}
+
+---
+
+## 2. Usuarios
+
+### Obtener perfil
+GET /user/profile
+
+### Actualizar perfil
+PUT /user/update-profile
+Body:
+{
+  "name": "NuevoNombre",
+  "lastname": "NuevoApellido",
+  "email": "nuevo@email.com"
+}
+
+### Listar usuarios (solo vendedor)
+GET /user/?skip=0&limit=100
+
+### Obtener usuario por ID
+GET /user/{user_id}
+
+### Actualizar usuario (solo vendedor)
+PUT /user/update/{user_id}
+Body:
+{
+  "name": "NuevoNombre",
+  "lastname": "NuevoApellido",
+  "email": "nuevo@email.com"
+}
+
+---
+
+## 3. Productos
+
+### Listar productos
+GET /products?skip=0&limit=10
+
+### Buscar productos
+POST /products/search
+Body:
+{
+  "toFind": "palabra_clave"
+}
+
+### Crear producto (vendedor/admin)
+POST /products
+Body:
+{
+  "name": "Producto",
+  "description": "Desc",
+  "price": 100,
+  "stock": 10,
+  "category": "cat"
+}
+
+### Obtener producto por ID
+GET /products/{id}
+
+### Actualizar producto (vendedor/admin)
+PUT /products/{id}
+Body: (campos a actualizar)
+
+### Eliminar producto (vendedor/admin)
+DELETE /products/{id}
+
+---
+
+## 4. Carrito
+
+### Crear carrito
+POST /carts
+Body:
+{
+  "user_id": 1
+}
+
+### Listar carritos
+GET /carts?skip=0&limit=100
+
+### Ver carrito por ID
+GET /carts/{cart_id}
+
+### Agregar producto al carrito
+PUT /carts/{cart_id}/add
+Body:
+{
+  "product_id": 1,
+  "quantity": 2
+}
+
+### Actualizar cantidad de producto
+PUT /carts/{cart_id}/product/{product_id}
+Body:
+{
+  "quantity": 3
+}
+
+### Eliminar producto del carrito
+DELETE /carts/{cart_id}/product/{product_id}
+
+### Aplicar cupón
+POST /carts/{cart_id}/apply-coupon
+Body:
+{
+  "code": "CUPON2025"
+}
+
+### Checkout del carrito
+PUT /carts/{cart_id}/checkout
+
+### Eliminar carrito
+DELETE /carts/{cart_id}
+
+---
+
+## 5. Órdenes
+
+### Crear orden
+POST /orders/create
+Body:
+{
+  "cart_id": 1
+}
+
+### Listar mis órdenes
+GET /orders/my-orders?status=pending
+
+### Ver orden por ID
+GET /orders/{order_id}
+
+---
+
+## 6. Gestión de Órdenes (Vendedor/Admin)
+
+### Ver todas las órdenes
+GET /orders/management?status=pending
+
+### Marcar como entregada
+POST /orders/management/{order_id}/deliver
+
+### Cancelar orden
+POST /orders/management/{order_id}/cancel
+
+### Historial de pedidos
+GET /orders/management/history
+
+---
+
+## 7. Ventas
+
+### Resumen de ventas
+GET /sales/summary/{status}?skip=0&limit=100
+
+---
+
+## 8. Pagos
+
+### Procesar pago
+POST /payment/process
+Body:
+{
+  "order_id": 1,
+  "payment_method": "credit_card" // o "debit_card", "transfer", "mercado_pago"
+}
+
+---
+
+## 9. Email
+
+### Enviar email
+POST /email/send-email
+Body: (verifica el tipo de email y los campos requeridos)
+
+### Generar HTML con IA
+POST /email/prompt-IA
+Body:
+{
+  "prompt": "Texto para la IA"
+}
+
+---
+
+## Notas para IA
+- Todos los endpoints devuelven errores con campo "detail".
+- Los endpoints protegidos requieren el header Authorization.
+- Los métodos y rutas pueden variar según el rol del usuario.
+- Consultar /docs para detalles OpenAPI en tiempo real.

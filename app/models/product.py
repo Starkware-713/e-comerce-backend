@@ -11,6 +11,8 @@ class Product(Base):
     price = Column(Integer)  
     is_active = Column(Boolean, default=True)  
     category = Column(Integer, index=True) 
-    sku = Column(Integer)
+    sku = Column(String(50), unique=True, nullable=True)  # SKU único y opcional
+    stock = Column(Integer, default=0)  # Stock con valor por defecto 0
+    image_url = Column(String(255), nullable=True)  # URL de la imagen, opcional
 
     sale_items = relationship("SaleItem", back_populates="product")
