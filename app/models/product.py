@@ -16,4 +16,9 @@ class Product(Base):
     stock = Column(Integer, default=0)  # Stock con valor por defecto 0
     image_url = Column(String(255), nullable=True)  # URL de la imagen, opcional
 
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    updated_at = Column(DateTime, onupdate=datetime.utcnow, nullable=True)
+    created_by = Column(Integer, nullable=False)
+    updated_by = Column(Integer, nullable=True)
+
     sale_items = relationship("SaleItem", back_populates="product")
