@@ -10,7 +10,7 @@ class Product(Base):
     description = Column(String, index=True)
     price = Column(Integer)  
     is_active = Column(Boolean, default=True)  
-    category = Column(Integer, index=True) 
+    category = Column(String(50), index=True)  # Cambiado a String para coincidir con el Enum
     sku = Column(String(50), unique=True, nullable=True)  # SKU único y opcional
     stock = Column(Integer, default=0)  # Stock con valor por defecto 0
     image_url = Column(String(255), nullable=True)  # URL de la imagen, opcional
