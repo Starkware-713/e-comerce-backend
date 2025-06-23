@@ -19,7 +19,7 @@ router = APIRouter(
 def create_product(
     product: schemas.ProductCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(check_rol(["vendedor", "admin"]))
+    current_user: User = Depends(check_rol(["vendedor"]))
 ):
     try:
         db_product = models.Product(**product.dict())

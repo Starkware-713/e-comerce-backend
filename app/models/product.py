@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.database import Base
 
 class Product(Base):
@@ -14,5 +15,9 @@ class Product(Base):
     sku = Column(String(50), unique=True, nullable=True)  # SKU único y opcional
     stock = Column(Integer, default=0)  # Stock con valor por defecto 0
     image_url = Column(String(255), nullable=True)  # URL de la imagen, opcional
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True, onupdate=datetime.utcnow)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     sale_items = relationship("SaleItem", back_populates="product")
