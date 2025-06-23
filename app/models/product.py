@@ -15,9 +15,5 @@ class Product(Base):
     sku = Column(String(50), unique=True, nullable=True)  # SKU único y opcional
     stock = Column(Integer, default=0)  # Stock con valor por defecto 0
     image_url = Column(String(255), nullable=True)  # URL de la imagen, opcional
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=True, onupdate=datetime.utcnow)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     sale_items = relationship("SaleItem", back_populates="product")
