@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from app.models import Base
-from app.models.user import User
-from app.models.product import Product
+from app.database import Base  # Cambiar de app.models a app.database
+
 class CartItem(Base):
     __tablename__ = "cart_items"
     
@@ -11,7 +10,8 @@ class CartItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     quantity = Column(Integer, default=1)
     
-    product = relationship(Product)
+    # Usar strings en lugar de importar las clases directamente
+    product = relationship("Product")
     cart = relationship("Cart", back_populates="items")
 
 class Cart(Base):
