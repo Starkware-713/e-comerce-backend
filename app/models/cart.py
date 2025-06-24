@@ -2,16 +2,16 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from app.models import Base
 from app.models.user import User
-
+from app.models.product import Product
 class CartItem(Base):
     __tablename__ = "cart_items"
     
     id = Column(Integer, primary_key=True, index=True)
     cart_id = Column(Integer, ForeignKey("carts.id"))
-    product_id = Column(Integer, ForeignKey("products.id"))
+    product_id = Column(Integer, ForeignKey("Product.id"))
     quantity = Column(Integer, default=1)
     
-    product = relationship("app.models.product.Product")
+    product = relationship(Product)
     cart = relationship("Cart", back_populates="items")
 
 class Cart(Base):
