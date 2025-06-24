@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from app.database import Base  # Cambiar de app.models a app.database
+from app.models import Base  # Unifica la importación de Base
 
 class CartItem(Base):
     __tablename__ = "cart_items"

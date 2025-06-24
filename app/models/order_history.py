@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from app.models import Base
+from app.models import Base  # Unifica la importación de Base
 from app.models.user import User
 from app.models.product import Product
 

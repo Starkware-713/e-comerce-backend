@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean
 from datetime import datetime
-from app.database import Base
+from app.models import Base  # Unifica la importación de Base
 
 class Coupon(Base):
     __tablename__ = "coupons"

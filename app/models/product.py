@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.database import Base
+from app.models import Base  # Unifica la importación de Base
 
 class Product(Base):
     __tablename__ = "products"

@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from fastapi import HTTPException
@@ -17,7 +16,8 @@ if not DATABASE_URL:
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+# Importar Base desde app.models
+from app.models import Base
 
 # Importar todos los modelos aquí
 from app.models.user import User
@@ -26,6 +26,7 @@ from app.models.cart import Cart
 from app.models.orders import Order
 from app.models.order_history import OrderHistory
 from app.models.sales import Sale
+from app.models.coupon import Coupon
 
 # Crear todas las tablas
 def create_tables():
