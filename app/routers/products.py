@@ -14,7 +14,7 @@ router = APIRouter(
     tags=["products"]
 )
 
-# Agregar Nuevos productos, solo si es vendedor o admin
+# Agregar Nuevos productos, solo si es vendedor
 @router.post("/", response_model=schemas.Product)
 def create_product(
     product: schemas.ProductCreate,
