@@ -8,6 +8,8 @@ from app.utils import get_current_user
 from app.models.user import User
 from app.models.coupon import Coupon
 from datetime import datetime
+from app.utils.ai import generate_ai_completion
+from fastapi import Body
 
 router = APIRouter(
     prefix="/carts",
@@ -21,9 +23,15 @@ def create_cart(
     current_user: User = Depends(get_current_user)
 ):
     try:
-        db_cart = models.Cart(user_id=cart.user_id)
-        db.add(db_cart)
-        db.flush()  # Para obtener el id del carrito
+        # Buscar si el usuario ya tiene un carrito activo
+        db_cart = db.query(models.Cart).filter(models.Cart.user_id == cart.user_id, models.Cart.status == "active").first()
+        if db_cart:
+            # Si ya existe, limpiar los items actuales del carrito
+            db.query(models.CartItem).filter(models.CartItem.cart_id == db_cart.id).delete()
+        else:
+            db_cart = models.Cart(user_id=cart.user_id)
+            db.add(db_cart)
+            db.flush()  # Para obtener el id del carrito
         for item in cart.items:
             # Validar que el producto existe
             product = db.query(models.Product).filter(models.Product.id == item.product.id).first()
@@ -281,13 +289,15 @@ def delete_cart(
     current_user: User = Depends(get_current_user)
 ):
     try:
-        cart = db.query(models.Cart).filter(models.Cart.id == cart_id).first()
+        cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
         if not cart:
             raise HTTPException(status_code=404, detail="Carrito no encontrado")
-        
+        # Eliminar primero los items asociados al carrito
+        db.query(models.CartItem).filter(models.CartItem.cart_id == cart.id).delete()
         db.delete(cart)
         db.commit()
-        return JSONResponse(status_code=204, content=None)
+        return cart
     except Exception as e:
+        db.rollback()
         print(f"Error eliminando el carrito {cart_id}: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")

@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import engine, Base, create_tables
-from app.routers import users, carts, products, auth, orders, sales, order_management, payment, mail
+from app.routers import users, carts, products, auth, orders, sales, order_management, payment, mail, ia
 
 # Carga de variables de entorno
 load_dotenv()
@@ -13,7 +13,7 @@ load_dotenv()
 app = FastAPI(
     title="API E-commerce con FastAPI y PostgreSQL",
     description="API para una webapp de e-commerce utilizando FastAPI y PostgreSQL",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Crear las tablas de la base de datos
@@ -38,6 +38,7 @@ app.include_router(order_management.router) #rutas de gestión de órdenes
 app.include_router(sales.router) #rutas de ventas
 app.include_router(payment.router) #rutas de pagos
 app.include_router(mail.router) #rutas de envío de correos
+app.include_router(ia.router) # rutas de IA para mejorar título y descripción de productos
 
 @app.get("/")
 def read_root():
