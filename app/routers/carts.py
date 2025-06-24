@@ -23,19 +23,28 @@ def create_cart(
     try:
         db_cart = models.Cart(user_id=cart.user_id)
         db.add(db_cart)
-        db.flush()  
+        db.flush()  # Para obtener el id del carrito
         for item in cart.items:
+            # Validar que el producto existe
+            product = db.query(models.Product).filter(models.Product.id == item.product.id).first()
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Producto con id {item.product.id} no encontrado")
             cart_item = models.CartItem(
                 cart_id=db_cart.id,
-                product_id=item.product.id,
+                product_id=product.id,
                 quantity=item.quantity
             )
             db.add(cart_item)
-        
         db.commit()
+        # Recargar el carrito con los items y productos asociados
         db.refresh(db_cart)
-        return db_cart
+        cart_with_items = db.query(models.Cart).options(
+            joinedload(models.Cart.user),
+            joinedload(models.Cart.items).joinedload(models.CartItem.product)
+        ).filter(models.Cart.id == db_cart.id).first()
+        return cart_with_items
     except Exception as e:
+        db.rollback()
         print(f"Error creando el carrito: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     
