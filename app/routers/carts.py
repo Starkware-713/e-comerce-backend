@@ -161,7 +161,7 @@ def delete_product_from_cart(
     cart_id: int,
     product_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)  # Corrige la referencia a User
 ):
     try:
         cart = db.query(models.Cart).filter(models.Cart.id == cart_id, models.Cart.user_id == current_user.id).first()
